@@ -1,0 +1,35 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Merchandising · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Portal del torneig</span></span>
+  </a>
+  <nav class="portal-nav">
+    <a href="competicio.html">Competició</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+    <a href="dinars.html">Dinars</a>
+    <a href="merch.html">Merch</a>
+    <a href="mvp.html">MVP</a>
+    <a href="fotos.html">Fotos</a>
+    <a href="avisos.html">Avisos</a>
+    <a href="inscripcio.html">Inscripció</a>
+  </nav>
+</header>
+<section class="section"><div class="section-head"><div><div class="eyebrow">Sota demanda</div><h1 class="section-title">Merchandising</h1></div></div>
+<div class="product-grid">
+<div class="product"><div class="mock-img">POLO TÈCNIC</div><h3>Polo tècnic</h3><div class="price">30 €</div><p class="meta">Talles XS–XXL</p><button class="btn btn-accent" onclick="order('Polo tècnic',30)">Demanar</button></div>
+<div class="product"><div class="mock-img">POLO COTÓ</div><h3>Polo de cotó</h3><div class="price">30 €</div><p class="meta">Talles XS–XXL</p><button class="btn btn-accent" onclick="order('Polo de cotó',30)">Demanar</button></div>
+<div class="product"><div class="mock-img">GORRA</div><h3>Gorra</h3><div class="price">15 €</div><p class="meta">Talla única</p><button class="btn btn-accent" onclick="order('Gorra',15)">Demanar</button></div>
+</div>
+<div id="orderBox" class="form-panel" style="margin-top:22px;display:none"></div>
+</section></div></main><script src="portal.js"></script><script>
+function order(product,price){
+ document.getElementById("orderBox").style.display="block";
+ document.getElementById("orderBox").innerHTML=`<h3>${product}</h3><div class="form-grid"><div class="field"><label>Nom i cognoms</label><input id="buyer"></div><div class="field"><label>Talla</label><select id="size"><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>Talla única</option></select></div><div class="field"><label>Quantitat</label><input id="qty" type="number" min="1" value="1"></div></div><div class="actions"><button class="btn btn-accent" onclick="confirmOrder('${product}',${price})">Confirmar i pagar</button></div>`;
+}
+function confirmOrder(product,price){
+ const buyer=document.getElementById("buyer").value.trim(),size=document.getElementById("size").value,qty=parseInt(document.getElementById("qty").value||1);
+ if(buyer.split(/\s+/).length<2){alert("Posa nom i cognoms.");return}
+ const s=Portal.load();s.merchOrders.push({buyer,product,size,qty,total:qty*price,status:"pagat"});Portal.save(s);Portal.fakePay("merch",qty*price,buyer+" · "+product);alert("Comanda registrada.");document.getElementById("orderBox").style.display="none";
+}
+</script></body></html>

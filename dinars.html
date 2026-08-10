@@ -1,0 +1,46 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dinars · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Portal del torneig</span></span>
+  </a>
+  <nav class="portal-nav">
+    <a href="competicio.html">Competició</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+    <a href="dinars.html">Dinars</a>
+    <a href="merch.html">Merch</a>
+    <a href="mvp.html">MVP</a>
+    <a href="fotos.html">Fotos</a>
+    <a href="avisos.html">Avisos</a>
+    <a href="inscripcio.html">Inscripció</a>
+  </nav>
+</header>
+<section class="section"><div class="section-head"><div><div class="eyebrow">Obert a tothom</div><h1 class="section-title">Dinars</h1></div></div>
+<div class="form-panel">
+<div class="form-grid"><div class="field"><label>Dinar</label><select id="meal"><option>Divendres · Fideus a la cassola</option><option>Dissabte · Paella</option></select></div><div class="field"><label>Nombre de persones</label><input id="count" type="number" min="1" max="12" value="1"></div></div>
+<div id="people" class="form-grid one" style="margin-top:14px"></div>
+<div class="payment-box" style="margin-top:16px"><strong>Preu orientatiu:</strong> 10 € per persona · beguda no inclosa.</div>
+<div class="actions"><button class="btn btn-accent" onclick="registerLunch()">Inscriure i pagar</button></div>
+</div>
+<div class="section-head" style="margin-top:35px"><div><div class="eyebrow">Consulta</div><h2 class="section-title" style="font-size:42px">Llista d'inscrits</h2></div><div class="field" style="min-width:240px"><label>Buscar nom</label><input id="search" placeholder="Nom o cognom"></div></div>
+<div id="summary" class="notice-card" style="margin-bottom:14px"></div><div id="list" class="list"></div>
+</section></div></main><script src="portal.js"></script><script>
+function drawPeople(){const n=Math.max(1,Math.min(12,parseInt(document.getElementById("count").value||1)));document.getElementById("people").innerHTML=Array.from({length:n},(_,i)=>`<div class="field"><label>Nom i cognoms · Persona ${i+1}</label><input class="personName" placeholder="Nom i cognoms"></div>`).join("")}
+document.getElementById("count").oninput=drawPeople;drawPeople();
+function registerLunch(){
+ const meal=document.getElementById("meal").value,names=[...document.querySelectorAll(".personName")].map(x=>x.value.trim());
+ if(names.some(n=>n.split(/\s+/).length<2)){alert("Cal posar nom i cognoms de totes les persones.");return}
+ const s=Portal.load();s.lunches[meal]=s.lunches[meal]||[];
+ const existing=s.lunches[meal].map(x=>x.toLowerCase());
+ const dup=names.find(n=>existing.includes(n.toLowerCase()));
+ if(dup){alert(dup+" ja consta a la llista d'aquest dinar.");return}
+ names.forEach(n=>s.lunches[meal].push(n));Portal.save(s);Portal.fakePay("dinar",names.length*10,meal+" · "+names.join(", "));render();
+}
+function render(){
+ const s=Portal.load(),meal=document.getElementById("meal").value,q=(document.getElementById("search").value||"").toLowerCase();
+ const arr=(s.lunches[meal]||[]).filter(n=>n.toLowerCase().includes(q));
+ document.getElementById("summary").innerHTML=`<strong>${meal}</strong><div class="meta">${(s.lunches[meal]||[]).length} persones inscrites</div>`;
+ document.getElementById("list").innerHTML=arr.length?arr.map(n=>`<div class="list-item"><div><strong>${Portal.esc(n)}</strong><div class="meta">Reserva confirmada</div></div><span class="badge">Inscrit</span></div>`).join(""):'<div class="list-item">No hi ha coincidències.</div>';
+}
+document.getElementById("meal").onchange=render;document.getElementById("search").oninput=render;render();
+</script></body></html>

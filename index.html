@@ -1,0 +1,38 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Portal del torneig</span></span>
+  </a>
+  <nav class="portal-nav">
+    <a href="competicio.html">Competició</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+    <a href="dinars.html">Dinars</a>
+    <a href="merch.html">Merch</a>
+    <a href="mvp.html">MVP</a>
+    <a href="fotos.html">Fotos</a>
+    <a href="avisos.html">Avisos</a>
+    <a href="inscripcio.html">Inscripció</a>
+  </nav>
+</header>
+<section class="public-hero"><div><div class="eyebrow">Tota la informació del torneig</div><h1>Torneig<br>2026</h1><p>Competició, horaris, resultats, dinars, merchandising, MVP, avisos, fotos i inscripcions en un únic lloc.</p></div><img src="logo.svg" alt=""></section>
+<div class="dashboard-grid">
+<div class="quick-card"><div class="qtitle">Competició</div><div class="qvalue">32</div><div class="meta">parelles previstes</div></div>
+<div class="quick-card"><div class="qtitle">Dinars</div><div id="lunchCount" class="qvalue">0</div><div class="meta">persones inscrites</div></div>
+<div class="quick-card"><div class="qtitle">Avisos</div><div id="noticeCount" class="qvalue">0</div><div class="meta">avisos publicats</div></div>
+</div>
+<section class="module-grid">
+<a class="module-card" href="competicio.html"><div class="tag">Competició</div><h3>Quadre i resultats</h3><p>Totes les fases, horaris, resultats i recorreguts possibles.</p></a>
+<a class="module-card" href="quan-jugo.html"><div class="tag">Jugadors</div><h3>Quan jugo?</h3><p>Busca el teu nom i consulta els possibles següents partits.</p></a>
+<a class="module-card" href="dinars.html"><div class="tag">Tothom</div><h3>Dinars</h3><p>Apunta una o diverses persones, consulta la llista i paga la reserva.</p></a>
+<a class="module-card" href="merch.html"><div class="tag">Comandes</div><h3>Merchandising</h3><p>Samarretes, polos i gorres amb talla, quantitat i pagament.</p></a>
+<a class="module-card" href="mvp.html"><div class="tag">Socis</div><h3>Votació MVP</h3><p>Un vot masculí i un vot femení per cada soci.</p></a>
+<a class="module-card" href="fotos.html"><div class="tag">Records</div><h3>Fotos</h3><p>Accés a l'arxiu fotogràfic del torneig a Dropbox.</p></a>
+<a class="module-card" href="avisos.html"><div class="tag">En directe</div><h3>Avisos</h3><p>Canvis d'horari, pistes i informació important.</p></a>
+<a class="module-card" href="inscripcio.html"><div class="tag">Jugadors</div><h3>Inscripció</h3><p>Inscriu la parella i paga la quota des de la mateixa web.</p></a>
+<a class="module-card" href="admin.html"><div class="tag">Privat</div><h3>Organització</h3><p>Prototip de gestió centralitzada per organització i arbitratge.</p></a>
+</section>
+<div class="footer"><span>Torneig 2026</span><span>Portal complet</span></div>
+</div></main><script src="portal.js"></script><script>
+const s=Portal.load();document.getElementById("lunchCount").textContent=Object.values(s.lunches).flat().length;document.getElementById("noticeCount").textContent=s.notices.length;
+</script></body></html>

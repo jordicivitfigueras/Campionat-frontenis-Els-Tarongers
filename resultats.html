@@ -1,0 +1,25 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Resultats · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Informació en directe</span></span>
+  </a>
+  <nav class="public-nav">
+    <a href="resultats.html">Resultats</a>
+    <a href="quadre.html">Quadre</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+  </nav>
+</header>
+<section class="section"><div class="section-head"><div><div class="eyebrow">En directe</div><h1 class="section-title">Resultats</h1></div><span class="status live">Actualitzat</span></div>
+<div id="results" class="public-results-grid"></div></section>
+<div class="footer"><span>Torneig 2026</span><span>Resultats oficials</span></div></div></main>
+<script src="app.js"></script><script>
+function render(){
+ const s=Torneig.loadState();
+ const ids=Torneig.allIds().filter(id=>s.matches[id].status==="final");
+ const el=document.getElementById("results");
+ if(!ids.length){el.innerHTML='<div class="panel panel-pad">Encara no hi ha resultats disponibles.</div>';return;}
+ el.innerHTML=ids.map(id=>{const m=s.matches[id];return `<div class="public-result"><div class="rmeta">${id} · ${m.stage}${(m.time||(Torneig.DEFAULT_TIMES&&Torneig.DEFAULT_TIMES[id]))?" · "+(m.time||(Torneig.DEFAULT_TIMES&&Torneig.DEFAULT_TIMES[id])):""}</div><div class="teams">${Torneig.escapeHtml(Torneig.pairName(m.team1))}<br>${Torneig.escapeHtml(Torneig.pairName(m.team2))}</div><div class="scoreline">${m.s1} – ${m.s2}</div></div>`}).join("");
+}
+if(Torneig.BC)Torneig.BC.onmessage=render;addEventListener("storage",render);setInterval(render,800);render();
+</script></body></html>

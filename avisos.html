@@ -1,0 +1,18 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Avisos · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Portal del torneig</span></span>
+  </a>
+  <nav class="portal-nav">
+    <a href="competicio.html">Competició</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+    <a href="dinars.html">Dinars</a>
+    <a href="merch.html">Merch</a>
+    <a href="mvp.html">MVP</a>
+    <a href="fotos.html">Fotos</a>
+    <a href="avisos.html">Avisos</a>
+    <a href="inscripcio.html">Inscripció</a>
+  </nav>
+</header><section class="section"><div class="section-head"><div><div class="eyebrow">Informació important</div><h1 class="section-title">Avisos</h1></div></div><div id="notices" class="list"></div></section></div></main>
+<script src="portal.js"></script><script>const s=Portal.load();document.getElementById("notices").innerHTML=s.notices.length?s.notices.slice().reverse().map(n=>`<div class="notice-card"><strong>${Portal.esc(n.title)}</strong><div>${Portal.esc(n.text)}</div><div class="meta">${Portal.esc(n.date||"")}</div></div>`).join(""):'<div class="list-item">No hi ha avisos.</div>';</script></body></html>

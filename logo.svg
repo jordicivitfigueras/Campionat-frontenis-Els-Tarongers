@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 470" aria-label="Torneig logo">
+  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+    <!-- outer vertical oval, deliberately open where the oranges sit -->
+    <path d="M83 160 C83 73 126 35 180 35 C234 35 277 73 277 160" stroke-width="7"/>
+    <path d="M83 275 C83 365 126 418 180 418 C234 418 277 365 277 275" stroke-width="7"/>
+    <!-- racket head -->
+    <ellipse cx="190" cy="190" rx="54" ry="73" transform="rotate(14 190 190)" stroke-width="10"/>
+    <!-- racket throat / handle -->
+    <path d="M164 251 C181 268 197 270 212 258 L183 337" stroke-width="11"/>
+    <path d="M163 251 L150 345" stroke-width="15"/>
+    <path d="M157 277 L190 264" stroke-width="7"/>
+  </g>
+  <!-- oranges -->
+  <g fill="#f29a20">
+    <circle cx="83" cy="228" r="23"/>
+    <circle cx="277" cy="228" r="23"/>
+  </g>
+  <!-- leaves -->
+  <g fill="#fff">
+    <path d="M88 204 C96 198 106 199 114 205 C104 205 97 207 91 211 Z"/>
+    <path d="M272 204 C280 198 290 199 298 205 C288 205 281 207 275 211 Z"/>
+  </g>
+</svg>

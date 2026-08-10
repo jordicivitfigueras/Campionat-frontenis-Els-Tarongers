@@ -1,0 +1,21 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fotos · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Portal del torneig</span></span>
+  </a>
+  <nav class="portal-nav">
+    <a href="competicio.html">Competició</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+    <a href="dinars.html">Dinars</a>
+    <a href="merch.html">Merch</a>
+    <a href="mvp.html">MVP</a>
+    <a href="fotos.html">Fotos</a>
+    <a href="avisos.html">Avisos</a>
+    <a href="inscripcio.html">Inscripció</a>
+  </nav>
+</header><section class="section"><div class="section-head"><div><div class="eyebrow">Arxiu fotogràfic</div><h1 class="section-title">Fotos del torneig</h1></div></div>
+<div class="form-panel"><h2>Dropbox</h2><p>La galeria completa es pot mantenir a Dropbox perquè pugueu afegir fotos durant el torneig sense tocar l'aplicació.</p><div id="dropbox"></div></div>
+</section></div></main><script src="portal.js"></script><script>
+const s=Portal.load();document.getElementById("dropbox").innerHTML=s.dropboxUrl?`<a class="btn btn-accent" target="_blank" href="${Portal.esc(s.dropboxUrl)}">Veure totes les fotos</a>`:'<div class="notice-card"><strong>Enllaç de Dropbox pendent</strong><div class="meta">L’organització el podrà configurar des de l’administració.</div></div>';
+</script></body></html>

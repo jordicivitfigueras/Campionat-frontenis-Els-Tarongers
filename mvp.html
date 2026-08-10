@@ -1,0 +1,27 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MVP · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Portal del torneig</span></span>
+  </a>
+  <nav class="portal-nav">
+    <a href="competicio.html">Competició</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+    <a href="dinars.html">Dinars</a>
+    <a href="merch.html">Merch</a>
+    <a href="mvp.html">MVP</a>
+    <a href="fotos.html">Fotos</a>
+    <a href="avisos.html">Avisos</a>
+    <a href="inscripcio.html">Inscripció</a>
+  </nav>
+</header>
+<section class="section"><div class="section-head"><div><div class="eyebrow">Només socis</div><h1 class="section-title">Votació MVP</h1></div></div>
+<div class="notice-card" style="margin-bottom:18px"><strong>1 vot masculí + 1 vot femení per soci</strong><div class="meta">Aquest prototip simula que l'usuari és soci. En producció es validarà amb el perfil de soci.</div></div>
+<div class="vote-grid"><div class="vote-card"><h2>MVP Masculí</h2><div id="male" class="vote-list"></div></div><div class="vote-card"><h2>MVP Femení</h2><div id="female" class="vote-list"></div></div></div>
+<div class="actions"><button class="btn btn-accent" onclick="vote()">Confirmar els dos vots</button></div>
+</section></div></main><script src="portal.js"></script><script>
+const candidates={"male": ["Mauro Lenhardi", "Roger Juanola", "Marc Muntané", "Alex Sanchez", "Julia Serrano", "Juan Sobreroca", "Xavi Palou fill", "Marius Alcala", "Adri Salaverría", "María Salaverría", "Arnau Costa", "Otger Costa", "Jordi Civit", "Laura Soler", "Marc Balcells", "Manel Villegas"], "female": ["Sergi Ripollés", "Ferran Cabezas", "Alvaro Palou", "Pepe Palou", "Pol Gaynes", "Gerard Civit", "Guillem Tost", "Joan Valette", "Pol Mitjavila", "Martí Coma", "Lluís Aymami", "Diego Salvo", "Carlota Domínguez", "Joel Socias", "Dardo Soler", "Edu Soler"]};let sm=null,sf=null;
+function draw(){document.getElementById("male").innerHTML=candidates.male.map(n=>`<div class="candidate ${sm===n?'selected':''}" onclick="sm='${String(n).replace(/'/g,"\'")}';draw()">${Portal.esc(n)}</div>`).join("");document.getElementById("female").innerHTML=candidates.female.map(n=>`<div class="candidate ${sf===n?'selected':''}" onclick="sf='${String(n).replace(/'/g,"\'")}';draw()">${Portal.esc(n)}</div>`).join("")}
+function vote(){if(!sm||!sf){alert("Has d'escollir un MVP masculí i un MVP femení.");return}const voter=prompt("Nom i cognoms del soci");if(!voter)return;const s=Portal.load();if(s.mvpVotes[voter.toLowerCase()]){alert("Aquest soci ja ha votat.");return}s.mvpVotes[voter.toLowerCase()]={male:sm,female:sf};Portal.save(s);alert("Vot registrat. Els resultats queden ocults fins al tancament.");}
+draw();
+</script></body></html>

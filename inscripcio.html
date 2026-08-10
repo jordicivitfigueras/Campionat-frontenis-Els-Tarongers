@@ -1,0 +1,23 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inscripció · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Portal del torneig</span></span>
+  </a>
+  <nav class="portal-nav">
+    <a href="competicio.html">Competició</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+    <a href="dinars.html">Dinars</a>
+    <a href="merch.html">Merch</a>
+    <a href="mvp.html">MVP</a>
+    <a href="fotos.html">Fotos</a>
+    <a href="avisos.html">Avisos</a>
+    <a href="inscripcio.html">Inscripció</a>
+  </nav>
+</header>
+<section class="section"><div class="section-head"><div><div class="eyebrow">Jugadors</div><h1 class="section-title">Inscripció al torneig</h1></div></div>
+<div class="form-panel"><div class="form-grid"><div class="field"><label>Jugador 1 · Nom i cognoms</label><input id="p1"></div><div class="field"><label>Jugador 2 · Nom i cognoms</label><input id="p2"></div><div class="field"><label>Jugador 1 és soci?</label><select id="s1"><option value="yes">Sí</option><option value="no">No</option></select></div><div class="field"><label>Jugador 2 és soci?</label><select id="s2"><option value="yes">Sí</option><option value="no">No</option></select></div></div>
+<div class="payment-box" style="margin-top:16px"><strong>Quota prototip:</strong> 22 € per parella.</div><div class="actions"><button class="btn btn-accent" onclick="register()">Inscriure i pagar 22 €</button></div></div>
+</section></div></main><script src="portal.js"></script><script>
+function register(){const p1=document.getElementById("p1").value.trim(),p2=document.getElementById("p2").value.trim();if(p1.split(/\s+/).length<2||p2.split(/\s+/).length<2){alert("Cal posar nom i cognoms dels dos jugadors.");return}const s=Portal.load();s.tournamentRegistrations.push({p1,p2,s1:document.getElementById("s1").value==="yes",s2:document.getElementById("s2").value==="yes",status:"pagat"});Portal.save(s);Portal.fakePay("inscripcio",22,p1+" / "+p2);alert("Inscripció registrada.");}
+</script></body></html>

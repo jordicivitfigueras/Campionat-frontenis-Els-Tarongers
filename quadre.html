@@ -1,0 +1,101 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quadre complet · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar">
+  <a class="brand" href="index.html">
+    <img class="brand-mark" src="logo.svg" alt="Torneig">
+    <span class="brand-copy"><strong>Torneig 2026</strong><span>Informació en directe</span></span>
+  </a>
+  <nav class="public-nav">
+    <a href="resultats.html">Resultats</a>
+    <a href="quadre.html" class="active">Quadre</a>
+    <a href="quan-jugo.html">Quan jugo?</a>
+  </nav>
+</header>
+<section class="section">
+  <div class="section-head"><div><div class="eyebrow">Totes les fases</div><h1 class="section-title">Quadre del torneig</h1></div><span class="status live">En directe</span></div>
+  <p class="path-note">Cada partit mostra horari i resultat. Quan una parella encara no està definida, veuràs el camí possible amb la lletra i el color corresponent.</p>
+  <div class="route-key">
+    <div class="key route-A"><span class="route-dot"></span>A / I / R1</div>
+    <div class="key route-B"><span class="route-dot"></span>B / J / R2</div>
+    <div class="key route-C"><span class="route-dot"></span>C / K / R3</div>
+    <div class="key route-D"><span class="route-dot"></span>D / L / R4</div>
+    <div class="key route-E"><span class="route-dot"></span>E / M / R5</div>
+    <div class="key route-F"><span class="route-dot"></span>F / N / R6</div>
+    <div class="key route-G"><span class="route-dot"></span>G / O / R7</div>
+    <div class="key route-H"><span class="route-dot"></span>H / P / R8</div>
+  </div>
+  <div class="full-bracket-wrap"><div id="fullBracket" class="full-bracket"></div></div>
+</section>
+<div class="footer"><span>Torneig 2026</span><span>Quadre oficial complet</span></div>
+</div></main>
+<script src="app.js"></script>
+<script>
+const rounds=[
+  {title:"1a fase",sub:"32 parelles",ids:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"]},
+  {title:"2a · guanyadors",sub:"Guanyadors 1a fase",ids:["A","B","C","D","E","F","G","H"]},
+  {title:"2a · perdedors",sub:"Perdedors 1a fase",ids:["I","J","K","L","M","N","O","P"]},
+  {title:"Repesca",sub:"Última oportunitat",ids:["R1","R2","R3","R4","R5","R6","R7","R8"]},
+  {title:"Vuitens",sub:"16 parelles",ids:["O1","O2","O3","O4","O5","O6","O7","O8"]},
+  {title:"Quarts",sub:"8 parelles",ids:["Q1","Q2","Q3","Q4"]},
+  {title:"Semifinals",sub:"4 parelles",ids:["S1","S2"]},
+  {title:"Finals",sub:"3r/4t + Final",ids:["3/4","F"]}
+];
+
+const sources = {
+ A:[["1","W"],["2","W"]],B:[["3","W"],["4","W"]],C:[["5","W"],["6","W"]],D:[["7","W"],["8","W"]],
+ E:[["9","W"],["10","W"]],F:[["11","W"],["12","W"]],G:[["13","W"],["14","W"]],H:[["15","W"],["16","W"]],
+ I:[["1","L"],["2","L"]],J:[["3","L"],["4","L"]],K:[["5","L"],["6","L"]],L:[["7","L"],["8","L"]],
+ M:[["9","L"],["10","L"]],N:[["11","L"],["12","L"]],O:[["13","L"],["14","L"]],P:[["15","L"],["16","L"]],
+ R1:[["A","L"],["M","W"]],R2:[["B","L"],["N","W"]],R3:[["C","L"],["O","W"]],R4:[["D","L"],["P","W"]],
+ R5:[["E","L"],["I","W"]],R6:[["F","L"],["J","W"]],R7:[["G","L"],["K","W"]],R8:[["H","L"],["L","W"]],
+ O1:[["A","W"],["R8","W"]],O2:[["B","W"],["R7","W"]],O3:[["C","W"],["R6","W"]],O4:[["D","W"],["R5","W"]],
+ O5:[["E","W"],["R4","W"]],O6:[["F","W"],["R3","W"]],O7:[["G","W"],["R2","W"]],O8:[["H","W"],["R1","W"]],
+ Q1:[["O1","W"],["O2","W"]],Q2:[["O3","W"],["O4","W"]],Q3:[["O5","W"],["O6","W"]],Q4:[["O7","W"],["O8","W"]],
+ S1:[["Q1","W"],["Q2","W"]],S2:[["Q3","W"],["Q4","W"]],
+ "3/4":[["S1","L"],["S2","L"]],F:[["S1","W"],["S2","W"]]
+};
+
+function winnerSide(m,side){
+ if(!m || m.status!=="final") return false;
+ return (side===1 && m.s1>m.s2)||(side===2 && m.s2>m.s1);
+}
+function routeBase(id){
+ if(/^R[1-8]$/.test(id)) return id;
+ if(/^O[1-8]$/.test(id)) return id;
+ if(/^Q[1-4]$/.test(id)) return id;
+ if(/^S[1-2]$/.test(id)) return id;
+ return id;
+}
+function sourceLabel(src){
+ const [id,outcome]=src;
+ return `${outcome==="W"?"Guanyador":"Perdedor"} ${id}`;
+}
+function slot(m,side){
+ const team=side===1?m.team1:m.team2;
+ const pts=side===1?m.s1:m.s2;
+ if(team){
+   const cls=m.status==="final"?(winnerSide(m,side)?"winner":"loser"):"";
+   return `<div class="fslot ${cls}"><span>${Torneig.escapeHtml(Torneig.pairName(team))}</span><span class="score">${m.status==="final"?pts:""}</span></div>`;
+ }
+ const src=(sources[m.id]||[])[side-1];
+ if(src){
+   const srcId=routeBase(src[0]);
+   return `<div class="fslot unknown route-${srcId}"><span class="route-tag"><span class="route-dot"></span><span class="route-label">${sourceLabel(src)}</span></span><span></span></div>`;
+ }
+ return `<div class="fslot unknown"><span>Per definir</span><span></span></div>`;
+}
+function card(m){
+ const time=m.time||(Torneig.DEFAULT_TIMES&&Torneig.DEFAULT_TIMES[m.id])||"Horari pendent";
+ return `<div class="fmatch">
+   <div class="fmatch-head"><span class="fmatch-id">${m.id}</span><span class="fmatch-stage">${m.stage}</span><span class="fmatch-time">${Torneig.escapeHtml(time)}</span></div>
+   ${slot(m,1)}${slot(m,2)}
+ </div>`;
+}
+function render(){
+ const s=Torneig.loadState();
+ document.getElementById("fullBracket").innerHTML=rounds.map(r=>`<div class="full-round"><div class="full-round-title">${r.title}<small>${r.sub}</small></div>${r.ids.map(id=>card(s.matches[id])).join("")}</div>`).join("");
+}
+if(Torneig.BC)Torneig.BC.onmessage=render;
+addEventListener("storage",render);
+setInterval(render,800);
+render();
+</script></body></html>

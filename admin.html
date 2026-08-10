@@ -1,0 +1,15 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin · Torneig 2026</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="page"><div class="container"><header class="topbar"><a class="brand" href="index.html"><img class="brand-mark" src="logo.svg"><span class="brand-copy"><strong>Torneig 2026</strong><span>Administració · prototip</span></span></a><nav class="portal-nav"><a href="control.html">Marcador</a><a href="admin.html" class="active">Dashboard</a><a href="index.html">Web pública</a></nav></header>
+<section class="section"><div class="section-head"><div><div class="eyebrow">Organització</div><h1 class="section-title">Dashboard</h1></div></div>
+<div class="dashboard-grid"><div class="quick-card"><div class="qtitle">Inscripcions</div><div id="regs" class="qvalue">0</div></div><div class="quick-card"><div class="qtitle">Dinars</div><div id="lunches" class="qvalue">0</div></div><div class="quick-card"><div class="qtitle">Comandes merch</div><div id="orders" class="qvalue">0</div></div></div>
+<div class="grid grid-2">
+<div class="form-panel"><h2>Publicar avís</h2><div class="field"><label>Títol</label><input id="nt"></div><div class="field" style="margin-top:10px"><label>Missatge</label><input id="nx"></div><div class="actions"><button class="btn btn-accent" onclick="notice()">Publicar</button></div></div>
+<div class="form-panel"><h2>Fotos · Dropbox</h2><div class="field"><label>Enllaç compartit</label><input id="db" placeholder="https://..."></div><div class="actions"><button class="btn btn-primary" style="color:#111;border:1px solid #ddd" onclick="saveDropbox()">Desar enllaç</button></div></div>
+</div>
+<h2 class="section-title" style="font-size:40px;margin-top:35px">Resum econòmic</h2><div id="payments" class="list"></div>
+</section></div></main><script src="portal.js"></script><script>
+function render(){const s=Portal.load();document.getElementById("regs").textContent=s.tournamentRegistrations.length;document.getElementById("lunches").textContent=Object.values(s.lunches).flat().length;document.getElementById("orders").textContent=s.merchOrders.length;document.getElementById("db").value=s.dropboxUrl||"";document.getElementById("payments").innerHTML=s.payments.length?s.payments.slice().reverse().map(p=>`<div class="list-item"><div><strong>${Portal.esc(p.kind)} · ${Portal.esc(p.ref)}</strong><div class="meta">${Portal.esc(p.status)}</div></div><div class="price">${p.amount} €</div></div>`).join(""):'<div class="list-item">Encara no hi ha pagaments.</div>';}
+function notice(){const s=Portal.load();s.notices.push({title:document.getElementById("nt").value||"Avís",text:document.getElementById("nx").value,date:new Date().toLocaleString()});Portal.save(s);document.getElementById("nt").value="";document.getElementById("nx").value="";alert("Avís publicat.");}
+function saveDropbox(){const s=Portal.load();s.dropboxUrl=document.getElementById("db").value.trim();Portal.save(s);alert("Enllaç desat.");}
+render();
+</script></body></html>

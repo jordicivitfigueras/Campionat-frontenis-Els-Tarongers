@@ -7,6 +7,7 @@
     { "source": "/horaris", "destination": "/resultats.html" },
     { "source": "/merchandising", "destination": "/merch.html" },
     { "source": "/patrocinadors", "destination": "/patrocinadors.html" },
+    { "source": "/admin/login", "destination": "/admin-login.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/admin/marcador", "destination": "/admin-marcador.html" },
     { "source": "/admin/horaris", "destination": "/admin-horaris.html" },

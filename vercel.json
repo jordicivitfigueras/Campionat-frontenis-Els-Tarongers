@@ -4,7 +4,7 @@
   "rewrites": [
     { "source": "/informacio", "destination": "/informacio.html" },
     { "source": "/directe", "destination": "/directe.html" },
-    { "source": "/horaris", "destination": "/resultats.html" },
+    { "source": "/horaris", "destination": "/horaris.html" },
     { "source": "/merchandising", "destination": "/merch.html" },
     { "source": "/patrocinadors", "destination": "/patrocinadors.html" },
     { "source": "/admin/login", "destination": "/admin-login.html" },

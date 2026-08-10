@@ -1,5 +1,5 @@
 -- Torneig Frontó Gelida 2026 · esquema de producció per Supabase
--- Executar a Supabase SQL Editor quan es creï el projecte.
+-- Executar a Supabase SQL Editor.
 
 create extension if not exists pgcrypto;
 
@@ -36,9 +36,9 @@ create table if not exists players (
   gender text check (gender in ('male','female')),
   member_number integer,
   is_member boolean not null default false,
-  created_at timestamptz not null default now(),
-  unique(lower(full_name))
+  created_at timestamptz not null default now()
 );
+create unique index if not exists players_full_name_lower_uidx on players (lower(full_name));
 
 create table if not exists pairs (
   id uuid primary key default gen_random_uuid(),
@@ -87,6 +87,7 @@ create table if not exists lunch_events (
   price numeric(10,2) not null default 10,
   is_open boolean not null default true
 );
+create unique index if not exists lunch_events_title_uidx on lunch_events(title);
 
 create table if not exists lunch_reservations (
   id uuid primary key default gen_random_uuid(),
@@ -136,20 +137,15 @@ create table if not exists mvp_votes (
   unique(member_id)
 );
 
--- Helper per permisos d'organització
 create or replace function public.is_staff()
 returns boolean
 language sql stable security definer set search_path = public
-as $$
-  select exists(select 1 from profiles where id = auth.uid() and role in ('admin','referee'));
-$$;
+as $$ select exists(select 1 from profiles where id = auth.uid() and role in ('admin','referee')); $$;
 
 create or replace function public.is_admin()
 returns boolean
 language sql stable security definer set search_path = public
-as $$
-  select exists(select 1 from profiles where id = auth.uid() and role = 'admin');
-$$;
+as $$ select exists(select 1 from profiles where id = auth.uid() and role = 'admin'); $$;
 
 alter table profiles enable row level security;
 alter table tournament_config enable row level security;
@@ -164,7 +160,36 @@ alter table merch_orders enable row level security;
 alter table notices enable row level security;
 alter table mvp_votes enable row level security;
 
--- Lectura pública del torneig
+-- Policies are dropped first so the script can safely be run again.
+drop policy if exists "public read config" on tournament_config;
+drop policy if exists "public read players" on players;
+drop policy if exists "public read pairs" on pairs;
+drop policy if exists "public read matches" on matches;
+drop policy if exists "public read lunches" on lunch_events;
+drop policy if exists "public read lunch list" on lunch_reservations;
+drop policy if exists "public read merch products" on merch_products;
+drop policy if exists "public read notices" on notices;
+drop policy if exists "public insert tournament registration" on tournament_registrations;
+drop policy if exists "public insert lunch reservation" on lunch_reservations;
+drop policy if exists "public insert merch order" on merch_orders;
+drop policy if exists "staff read registrations" on tournament_registrations;
+drop policy if exists "staff manage registrations" on tournament_registrations;
+drop policy if exists "admin delete registrations" on tournament_registrations;
+drop policy if exists "staff manage matches" on matches;
+drop policy if exists "staff manage lunches" on lunch_events;
+drop policy if exists "staff update lunch reservations" on lunch_reservations;
+drop policy if exists "admin delete lunch reservations" on lunch_reservations;
+drop policy if exists "staff manage merch products" on merch_products;
+drop policy if exists "staff read merch orders" on merch_orders;
+drop policy if exists "staff update merch orders" on merch_orders;
+drop policy if exists "admin delete merch orders" on merch_orders;
+drop policy if exists "staff manage notices" on notices;
+drop policy if exists "admin manage config" on tournament_config;
+drop policy if exists "staff manage players" on players;
+drop policy if exists "staff manage pairs" on pairs;
+drop policy if exists "member insert own mvp vote" on mvp_votes;
+drop policy if exists "member read own mvp vote" on mvp_votes;
+
 create policy "public read config" on tournament_config for select using (true);
 create policy "public read players" on players for select using (true);
 create policy "public read pairs" on pairs for select using (true);
@@ -173,13 +198,9 @@ create policy "public read lunches" on lunch_events for select using (true);
 create policy "public read lunch list" on lunch_reservations for select using (true);
 create policy "public read merch products" on merch_products for select using (true);
 create policy "public read notices" on notices for select using (published = true);
-
--- Formularis públics: només INSERT. L'usuari no pot modificar ni eliminar després.
 create policy "public insert tournament registration" on tournament_registrations for insert with check (true);
 create policy "public insert lunch reservation" on lunch_reservations for insert with check (true);
 create policy "public insert merch order" on merch_orders for insert with check (true);
-
--- Organització
 create policy "staff read registrations" on tournament_registrations for select using (is_staff());
 create policy "staff manage registrations" on tournament_registrations for update using (is_staff()) with check (is_staff());
 create policy "admin delete registrations" on tournament_registrations for delete using (is_admin());
@@ -195,24 +216,16 @@ create policy "staff manage notices" on notices for all using (is_staff()) with 
 create policy "admin manage config" on tournament_config for all using (is_admin()) with check (is_admin());
 create policy "staff manage players" on players for all using (is_staff()) with check (is_staff());
 create policy "staff manage pairs" on pairs for all using (is_staff()) with check (is_staff());
-
--- MVP: només un usuari autenticat que sigui soci pot votar, una vegada.
-create policy "member insert own mvp vote" on mvp_votes for insert
-with check (
-  member_id = auth.uid()
-  and exists(select 1 from profiles where id = auth.uid() and is_member = true)
-);
+create policy "member insert own mvp vote" on mvp_votes for insert with check (member_id = auth.uid() and exists(select 1 from profiles where id = auth.uid() and is_member = true));
 create policy "member read own mvp vote" on mvp_votes for select using (member_id = auth.uid() or is_admin());
 
--- Realtime
-alter publication supabase_realtime add table matches;
-alter publication supabase_realtime add table notices;
-alter publication supabase_realtime add table lunch_reservations;
+-- Add Realtime tables only when they are not already members of the publication.
+do $$ begin
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='matches') then alter publication supabase_realtime add table matches; end if;
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='notices') then alter publication supabase_realtime add table notices; end if;
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='lunch_reservations') then alter publication supabase_realtime add table lunch_reservations; end if;
+end $$;
 
--- Dinars inicials
-insert into lunch_events(title, price)
-select 'Divendres · Fideus a la cassola', 10
-where not exists(select 1 from lunch_events where title='Divendres · Fideus a la cassola');
-insert into lunch_events(title, price)
-select 'Dissabte · Paella', 10
-where not exists(select 1 from lunch_events where title='Dissabte · Paella');
+insert into tournament_config(id) values ('2026') on conflict (id) do nothing;
+insert into lunch_events(title, price) values ('Divendres · Fideus a la cassola',10) on conflict (title) do nothing;
+insert into lunch_events(title, price) values ('Dissabte · Paella',10) on conflict (title) do nothing;

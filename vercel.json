@@ -1,4 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/horaris", "destination": "/resultats.html" },
+    { "source": "/merchandising", "destination": "/merch.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/marcador", "destination": "/admin.html" },
+    { "source": "/admin/horaris", "destination": "/admin.html" },
+    { "source": "/admin/pagaments", "destination": "/admin.html" },
+    { "source": "/admin/dinars", "destination": "/admin.html" },
+    { "source": "/admin/parelles", "destination": "/admin.html" },
+    { "source": "/admin/avisos", "destination": "/admin.html" },
+    { "source": "/admin/configuracio", "destination": "/admin.html" }
+  ]
 }

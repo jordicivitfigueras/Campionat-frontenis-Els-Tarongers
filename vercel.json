@@ -5,12 +5,12 @@
     { "source": "/horaris", "destination": "/resultats.html" },
     { "source": "/merchandising", "destination": "/merch.html" },
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/marcador", "destination": "/admin.html" },
-    { "source": "/admin/horaris", "destination": "/admin.html" },
-    { "source": "/admin/pagaments", "destination": "/admin.html" },
-    { "source": "/admin/dinars", "destination": "/admin.html" },
-    { "source": "/admin/parelles", "destination": "/admin.html" },
-    { "source": "/admin/avisos", "destination": "/admin.html" },
-    { "source": "/admin/configuracio", "destination": "/admin.html" }
+    { "source": "/admin/marcador", "destination": "/admin-marcador.html" },
+    { "source": "/admin/horaris", "destination": "/admin-horaris.html" },
+    { "source": "/admin/pagaments", "destination": "/admin-pagaments.html" },
+    { "source": "/admin/dinars", "destination": "/admin-dinars.html" },
+    { "source": "/admin/parelles", "destination": "/admin-parelles.html" },
+    { "source": "/admin/avisos", "destination": "/admin-avisos.html" },
+    { "source": "/admin/configuracio", "destination": "/admin-configuracio.html" }
   ]
 }

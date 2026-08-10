@@ -14,6 +14,7 @@
     { "source": "/admin/dinars", "destination": "/admin-dinars.html" },
     { "source": "/admin/parelles", "destination": "/admin-parelles.html" },
     { "source": "/admin/avisos", "destination": "/admin-avisos.html" },
-    { "source": "/admin/configuracio", "destination": "/admin-configuracio.html" }
+    { "source": "/admin/configuracio", "destination": "/admin-configuracio.html" },
+    { "source": "/admin/exportacions", "destination": "/admin-exportacions.html" }
   ]
 }

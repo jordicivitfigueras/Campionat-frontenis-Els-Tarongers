@@ -1,0 +1,12 @@
+{
+  "name": "Torneig Frontó Gelida 2026",
+  "short_name": "Frontó 2026",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6f3",
+  "theme_color": "#086443",
+  "description": "Portal oficial del Torneig Frontó Gelida 2026",
+  "icons": [
+    {"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}

@@ -1,1 +1,74 @@
-<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#086443"><title>En directe · Campionat 2026</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="professional.css"><style>.live-stage{min-height:72vh;display:grid;place-items:center}.live-panel{width:min(1180px,100%);background:#fff;border-radius:28px;box-shadow:0 25px 70px rgba(5,56,37,.18);padding:30px}.live-badge{display:inline-flex;align-items:center;gap:8px;background:#fff0d8;color:#9b5b00;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:950}.live-badge i{width:9px;height:9px;border-radius:50%;background:#ed9f24;box-shadow:0 0 0 5px rgba(237,159,36,.15)}.live-meta{text-align:center;color:#6d7a73;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-top:10px}.live-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:center;margin-top:24px}.live-team{text-align:center;font-size:clamp(22px,4vw,50px);font-weight:950;line-height:1.05}.live-score{font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(76px,14vw,170px);color:#086443;white-space:nowrap}.next-live{margin-top:20px;background:#f1f5f2;border-radius:16px;padding:16px;text-align:center;font-weight:800}.next-live strong{color:#0b5f43}.live-top{text-align:center}.live-actions{display:flex;justify-content:center;gap:9px;margin-top:16px}@media(max-width:760px){.live-teams{grid-template-columns:1fr}.live-score{order:-1}.live-panel{padding:20px}.live-team{font-size:28px}.live-stage{min-height:64vh}}</style></head><body><main class="page"><div class="container"><header class="topbar"></header><section class="section live-stage"><div class="live-panel"><div class="live-top"><span id="badge" class="live-badge"><i></i><span>EN DIRECTE</span></span><div class="live-meta" id="meta">Campionat Frontenis Els Tarongers 2026</div></div><div class="live-teams"><div class="live-team" id="team1">—</div><div class="live-score" id="score">0 – 0</div><div class="live-team" id="team2">—</div></div><div class="next-live" id="next">Esperant partit…</div><div class="live-actions"><button class="btn btn-secondary" onclick="UX2?.share(document.title,'Segueix el Campionat Frontenis Els Tarongers en directe')">↗ Compartir</button><a class="btn btn-secondary" href="/horaris">Horaris</a></div></div></section></div></main><script src="app.js"></script><script>function render(){const s=Torneig.loadState(),ids=Torneig.allIds(),live=ids.find(id=>s.matches[id].status==='en joc'),current=live||ids.find(id=>s.matches[id].status!=='final'&&s.matches[id].team1&&s.matches[id].team2);if(!current){badge.style.display='none';meta.textContent='Campionat finalitzat';team1.textContent='Gràcies';team2.textContent='a tothom';score.textContent='★';next.textContent='';return}const m=s.matches[current],isLive=m.status==='en joc';badge.style.display='inline-flex';badge.querySelector('span').textContent=isLive?'EN DIRECTE':'PRÒXIM PARTIT';meta.textContent=`Partit ${current} · ${m.stage||Torneig.stageOf(current)||''} · ${m.time||''} · ${m.court||'Pista 1'}`;team1.textContent=Torneig.pairName(m.team1);team2.textContent=Torneig.pairName(m.team2);score.textContent=isLive?`${m.s1} – ${m.s2}`:'VS';const idx=ids.indexOf(current),nextId=ids.slice(idx+1).find(id=>s.matches[id].status!=='final'&&s.matches[id].team1&&s.matches[id].team2);if(nextId){const n=s.matches[nextId];next.innerHTML=`<strong>Següent · ${nextId}</strong><br>${Torneig.escapeHtml(Torneig.pairName(n.team1))} vs ${Torneig.escapeHtml(Torneig.pairName(n.team2))} · ${Torneig.escapeHtml(n.time||'')}`}else next.textContent=isLive?'Últim partit confirmat':'Sense següent partit confirmat'}if(Torneig.BC)Torneig.BC.onmessage=render;addEventListener('storage',render);window.addEventListener('supabase:change',render);setInterval(render,1000);render();</script><script src="professional-shell.js"></script></body></html>
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#086443">
+  <title>En directe · Campionat 2026</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/professional.css">
+  <style>
+    .live-wrap{max-width:1240px;margin:0 auto}.live-shell{position:relative;overflow:hidden;background:linear-gradient(145deg,#063f2d 0%,#086443 58%,#0a7752 100%);border-radius:30px;padding:28px;color:#fff;box-shadow:0 28px 80px rgba(5,56,37,.22)}
+    .live-shell:before{content:"";position:absolute;width:430px;height:430px;border-radius:50%;right:-190px;top:-260px;background:rgba(255,255,255,.07)}
+    .live-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}.live-kicker{font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#ffd08a}.live-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:9px 13px;font-size:11px;font-weight:950}.live-badge i{width:8px;height:8px;border-radius:50%;background:#ffc46e;box-shadow:0 0 0 5px rgba(255,196,110,.15)}
+    .match-meta{position:relative;text-align:center;font-size:12px;font-weight:850;letter-spacing:.045em;color:rgba(255,255,255,.72);margin:8px 0 19px}.score-grid{position:relative;display:grid;grid-template-columns:1fr 260px 1fr;gap:16px;align-items:stretch}.team-card{display:flex;align-items:center;justify-content:center;min-height:250px;padding:24px;text-align:center;background:rgba(255,255,255,.96);color:#143d2f;border-radius:22px;box-shadow:0 18px 50px rgba(0,0,0,.11)}.team-name{font-size:clamp(24px,3.2vw,42px);font-weight:950;line-height:1.04;letter-spacing:-.035em}.score-card{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:250px;border-radius:22px;background:#f2a33b;color:#173229;box-shadow:0 18px 50px rgba(0,0,0,.12)}.score{font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(82px,11vw,138px);line-height:.85;letter-spacing:-.04em;white-space:nowrap}.score-label{margin-top:16px;font-size:10px;font-weight:950;letter-spacing:.1em;text-transform:uppercase}
+    .next-card{position:relative;margin-top:14px;padding:15px 18px;border-radius:16px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);text-align:center;color:rgba(255,255,255,.84);font-size:13px;font-weight:750}.next-card strong{color:#fff}.live-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:18px}.live-actions .btn{background:#fff!important}.sync-note{text-align:center;margin-top:12px;color:rgba(255,255,255,.55);font-size:10px;font-weight:800}
+    .no-match{grid-column:1/-1;background:#fff;color:#173229;border-radius:22px;padding:38px;text-align:center}.no-match h2{margin:0 0 8px;color:#073e2d}.no-match p{margin:0;color:#6f8179}
+    @media(max-width:900px){.score-grid{grid-template-columns:1fr}.score-card{order:-1;min-height:180px}.team-card{min-height:145px}.score{font-size:100px}.live-head{align-items:flex-start;flex-direction:column}}
+    @media(max-width:560px){.live-shell{padding:18px 12px;border-radius:22px}.score-grid{gap:10px}.team-card{min-height:120px;padding:18px}.team-name{font-size:25px}.score-card{min-height:150px}.score{font-size:86px}}
+  </style>
+</head>
+<body>
+<main class="page"><div class="container"><section class="section live-wrap">
+  <div class="live-shell">
+    <div class="live-head"><div><div class="live-kicker">Campionat Frontenis Els Tarongers · 2026</div></div><span id="badge" class="live-badge"><i></i><span>PRÒXIM PARTIT</span></span></div>
+    <div id="meta" class="match-meta">Carregant el marcador…</div>
+    <div id="scoreGrid" class="score-grid"><div class="no-match"><h2>Carregant partits…</h2><p>Connectant amb l’organització.</p></div></div>
+    <div id="next" class="next-card">Esperant informació del següent partit…</div>
+    <div class="live-actions"><button class="btn btn-secondary" onclick="UX2?.share(document.title,'Segueix el Campionat Frontenis Els Tarongers en directe')">↗ Compartir</button><a class="btn btn-secondary" href="/horaris">Horaris</a><a class="btn btn-secondary" href="/quadre">Quadre</a></div>
+    <div id="syncNote" class="sync-note">Actualització automàtica en directe</div>
+  </div>
+</section></div></main>
+<script src="/app.js?v=2026.08.11.2"></script>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const badge=$('badge'),meta=$('meta'),grid=$('scoreGrid'),next=$('next'),syncNote=$('syncNote');
+  function playable(s,id){const m=s?.matches?.[id];return !!(m&&m.status!=='final'&&m.team1&&m.team2)}
+  function safeState(){
+    let s=Torneig.loadState();
+    const ids=Torneig.allIds();
+    if(ids.some(id=>playable(s,id))||ids.some(id=>s.matches?.[id]?.status==='final')) return s;
+    const fresh=Torneig.freshState();
+    if(ids.some(id=>playable(fresh,id))) return fresh;
+    return s;
+  }
+  function render(){
+    const s=safeState(),ids=Torneig.allIds();
+    const live=ids.find(id=>s.matches?.[id]?.status==='en joc'&&s.matches[id].team1&&s.matches[id].team2);
+    const current=live||ids.find(id=>playable(s,id));
+    if(!current){
+      badge.style.display='none';
+      meta.textContent='Campionat Frontenis Els Tarongers 2026';
+      grid.innerHTML='<div class="no-match"><h2>Encara no hi ha cap partit disponible</h2><p>Quan l’organització activi el següent partit apareixerà aquí automàticament.</p></div>';
+      next.textContent='Actualització automàtica activada';
+      return;
+    }
+    const m=s.matches[current],isLive=m.status==='en joc';
+    badge.style.display='inline-flex';badge.querySelector('span').textContent=isLive?'EN DIRECTE':'PRÒXIM PARTIT';
+    meta.textContent=`${current==='FINAL'?'FINAL':'Partit '+current} · ${m.stage||Torneig.stageOf(current)||''} · ${m.time||'Horari pendent'} · ${m.court||'Pista 1'}`;
+    const t1=Torneig.escapeHtml(Torneig.pairName(m.team1)),t2=Torneig.escapeHtml(Torneig.pairName(m.team2));
+    grid.innerHTML=`<div class="team-card"><div class="team-name">${t1}</div></div><div class="score-card"><div class="score">${isLive?`${m.s1||0}–${m.s2||0}`:'VS'}</div><div class="score-label">${isLive?'Marcador':'Partit preparat'}</div></div><div class="team-card"><div class="team-name">${t2}</div></div>`;
+    const idx=ids.indexOf(current),nextId=ids.slice(idx+1).find(id=>playable(s,id));
+    if(nextId){const n=s.matches[nextId];next.innerHTML=`<strong>Següent · ${nextId==='FINAL'?'FINAL':'Partit '+nextId}</strong><br>${Torneig.escapeHtml(Torneig.pairName(n.team1))} vs ${Torneig.escapeHtml(Torneig.pairName(n.team2))} · ${Torneig.escapeHtml(n.time||'Horari pendent')}`}
+    else next.textContent=isLive?'Últim partit confirmat':'Sense següent partit confirmat';
+  }
+  if(Torneig.BC)Torneig.BC.onmessage=render;
+  addEventListener('storage',render);
+  addEventListener('supabase:change',render);
+  addEventListener('supabase:realtime',e=>{syncNote.textContent=e.detail?.status==='SUBSCRIBED'?'● Connectat en directe':'Actualitzant connexió…'});
+  setInterval(render,1200);render();
+})();
+</script>
+<script src="/professional-shell.js?v=2026.08.11.7"></script>
+</body></html>

@@ -1,13 +1,13 @@
 (()=>{
   const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
   const firstTwo=s=>norm(s).split(' ').filter(Boolean).slice(0,2).join(' ');
-  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));
   let names=[],loaded=false,loading=null;
 
   function injectStyle(){
     if(document.getElementById('db-name-picker-style'))return;
     const st=document.createElement('style');st.id='db-name-picker-style';st.textContent=`
-      .db-name-picker-wrap{position:relative}.db-name-picker-menu{position:absolute;z-index:1000;left:0;right:0;top:calc(100% + 5px);max-height:280px;overflow:auto;background:#fff;border:1px solid #d8e4de;border-radius:14px;box-shadow:0 18px 46px rgba(12,45,32,.18);display:none}.db-name-picker-menu.open{display:block}.db-name-picker-option{display:block;width:100%;border:0;border-bottom:1px solid #edf2ef;background:#fff;text-align:left;padding:11px 13px;cursor:pointer;font:inherit;color:#17332a}.db-name-picker-option:last-child{border-bottom:0}.db-name-picker-option:hover,.db-name-picker-option.active{background:#eef7f2}.db-name-picker-option strong{display:block;font-size:13px}.db-name-picker-hint{font-size:10px;color:#718078;margin-top:4px}.db-name-picker-invalid{border-color:#c96c55!important;box-shadow:0 0 0 3px rgba(201,108,85,.10)!important}`;
+      .db-name-picker-wrap{position:relative}.db-name-picker-menu{position:absolute;z-index:1000;left:0;right:0;top:calc(100% + 5px);max-height:280px;overflow:auto;-webkit-overflow-scrolling:touch;background:#fff;border:1px solid #d8e4de;border-radius:14px;box-shadow:0 18px 46px rgba(12,45,32,.18);display:none}.db-name-picker-menu.open{display:block}.db-name-picker-option{display:block;width:100%;border:0;border-bottom:1px solid #edf2ef;background:#fff;text-align:left;padding:13px;min-height:48px;cursor:pointer;font:inherit;color:#17332a;touch-action:manipulation}.db-name-picker-option:last-child{border-bottom:0}.db-name-picker-option:hover,.db-name-picker-option.active{background:#eef7f2}.db-name-picker-option strong{display:block;font-size:13px}.db-name-picker-hint{font-size:10px;color:#718078;margin-top:4px}.db-name-picker-invalid{border-color:#c96c55!important;box-shadow:0 0 0 3px rgba(201,108,85,.10)!important}`;
     document.head.appendChild(st);
   }
 
@@ -54,15 +54,20 @@
     injectStyle();
     const parent=input.parentElement;parent.classList.add('db-name-picker-wrap');
     const menu=document.createElement('div');menu.className='db-name-picker-menu';menu.setAttribute('role','listbox');parent.appendChild(menu);
-    let selected='',active=-1,current=[];
+    let selected='',active=-1,current=[],choosing=false;
     const valid=()=>{const v=input.value.trim();if(!v)return true;if(numericAllowed(input)&&/^\d+$/.test(v))return true;return !!selected&&norm(selected)===norm(v)};
     const markValid=()=>{input.classList.toggle('db-name-picker-invalid',!valid());input.dataset.dbNamePickerValid=valid()?'1':'0'};
-    const choose=v=>{selected=v;input.value=v;input.dataset.dbNamePickerValid='1';input.classList.remove('db-name-picker-invalid');menu.classList.remove('open');input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));input.dispatchEvent(new CustomEvent('namepicker:selected',{bubbles:true,detail:{name:v}}))};
+    const choose=v=>{if(!v)return;choosing=true;selected=v;input.value=v;input.dataset.dbNamePickerValid='1';input.classList.remove('db-name-picker-invalid');menu.classList.remove('open');input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));input.dispatchEvent(new CustomEvent('namepicker:selected',{bubbles:true,detail:{name:v}}));setTimeout(()=>{choosing=false},250)};
     const render=async()=>{
-      const list=await loadNames(),q=norm(input.value);if(document.activeElement!==input)return;
+      const list=await loadNames(),q=norm(input.value);if(document.activeElement!==input&&!menu.matches(':hover'))return;
       current=(q?list.filter(n=>norm(n).includes(q)||firstTwo(n).includes(firstTwo(q))):list).slice(0,25);active=-1;
       menu.innerHTML=current.length?current.map((n,i)=>`<button type="button" class="db-name-picker-option" data-i="${i}"><strong>${esc(n)}</strong><span class="db-name-picker-hint">Selecciona aquest nom</span></button>`).join(''):'<div class="db-name-picker-option"><strong>Cap coincidència</strong><span class="db-name-picker-hint">Escriu una altra part del nom</span></div>';
-      menu.classList.add('open');menu.querySelectorAll('[data-i]').forEach(b=>b.onmousedown=e=>{e.preventDefault();choose(current[Number(b.dataset.i)])});
+      menu.classList.add('open');menu.querySelectorAll('[data-i]').forEach(b=>{
+        const pick=e=>{e.preventDefault();e.stopPropagation();choose(current[Number(b.dataset.i)])};
+        b.addEventListener('pointerdown',pick);
+        b.addEventListener('touchstart',pick,{passive:false});
+        b.addEventListener('click',pick);
+      });
     };
     input.addEventListener('focus',render);
     input.addEventListener('input',()=>{if(norm(input.value)!==norm(selected))selected='';input.dataset.dbNamePickerValid='0';render()});
@@ -73,7 +78,9 @@
       else if(e.key==='Enter'&&menu.classList.contains('open')){if(active>=0&&current[active]){e.preventDefault();choose(current[active])}else if(current.length===1){e.preventDefault();choose(current[0])}else if(!valid()){e.preventDefault();input.classList.add('db-name-picker-invalid')}}
       else if(e.key==='Escape')menu.classList.remove('open');
     });
-    input.addEventListener('blur',()=>setTimeout(()=>{menu.classList.remove('open');markValid()},140));
+    input.addEventListener('blur',()=>setTimeout(()=>{if(!choosing){menu.classList.remove('open');markValid()}},500));
+    menu.addEventListener('pointerdown',()=>{choosing=true});
+    menu.addEventListener('pointerup',()=>setTimeout(()=>{choosing=false},250));
     input.__dbNamePicker={valid,open:render};
   }
 

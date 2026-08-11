@@ -1,7 +1,7 @@
 (()=>{
   const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
   const firstTwo=s=>norm(s).split(' ').filter(Boolean).slice(0,2).join(' ');
-  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));
+  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   let names=[],loaded=false,loading=null;
 
   function injectStyle(){
@@ -14,7 +14,7 @@
   async function loadNames(){
     if(loaded)return names;if(loading)return loading;
     loading=(async()=>{
-      if(!window.SupaSync?.req) return [];
+      if(!window.SupaSync?.req)return [];
       const safe=(path,opt)=>SupaSync.req(path,opt).catch(()=>[]);
       const [players,members,regs,meals]=await Promise.all([
         safe('/rest/v1/players?select=full_name'),
@@ -54,18 +54,18 @@
     injectStyle();
     const parent=input.parentElement;parent.classList.add('db-name-picker-wrap');
     const menu=document.createElement('div');menu.className='db-name-picker-menu';menu.setAttribute('role','listbox');parent.appendChild(menu);
-    let selected='',active=-1,current=[],choosing=false;
+    let selected='',active=-1,current=[];
     const valid=()=>{const v=input.value.trim();if(!v)return true;if(numericAllowed(input)&&/^\d+$/.test(v))return true;return !!selected&&norm(selected)===norm(v)};
     const markValid=()=>{input.classList.toggle('db-name-picker-invalid',!valid());input.dataset.dbNamePickerValid=valid()?'1':'0'};
-    const choose=v=>{if(!v)return;choosing=true;selected=v;input.value=v;input.dataset.dbNamePickerValid='1';input.classList.remove('db-name-picker-invalid');menu.classList.remove('open');input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));input.dispatchEvent(new CustomEvent('namepicker:selected',{bubbles:true,detail:{name:v}}));setTimeout(()=>{choosing=false},250)};
+    const choose=v=>{if(!v)return;selected=v;input.value=v;input.dataset.dbNamePickerValid='1';input.classList.remove('db-name-picker-invalid');menu.classList.remove('open');input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));input.dispatchEvent(new CustomEvent('namepicker:selected',{bubbles:true,detail:{name:v}}))};
     const render=async()=>{
-      const list=await loadNames(),q=norm(input.value);if(document.activeElement!==input&&!menu.matches(':hover'))return;
+      const list=await loadNames(),q=norm(input.value);
       current=(q?list.filter(n=>norm(n).includes(q)||firstTwo(n).includes(firstTwo(q))):list).slice(0,25);active=-1;
       menu.innerHTML=current.length?current.map((n,i)=>`<button type="button" class="db-name-picker-option" data-i="${i}"><strong>${esc(n)}</strong><span class="db-name-picker-hint">Selecciona aquest nom</span></button>`).join(''):'<div class="db-name-picker-option"><strong>Cap coincidència</strong><span class="db-name-picker-hint">Escriu una altra part del nom</span></div>';
-      menu.classList.add('open');menu.querySelectorAll('[data-i]').forEach(b=>{
+      menu.classList.add('open');
+      menu.querySelectorAll('[data-i]').forEach(b=>{
         const pick=e=>{e.preventDefault();e.stopPropagation();choose(current[Number(b.dataset.i)])};
         b.addEventListener('pointerdown',pick);
-        b.addEventListener('touchstart',pick,{passive:false});
         b.addEventListener('click',pick);
       });
     };
@@ -76,15 +76,22 @@
       if(e.key==='ArrowDown'&&opts.length){e.preventDefault();active=Math.min(opts.length-1,active+1);opts.forEach((x,i)=>x.classList.toggle('active',i===active));opts[active]?.scrollIntoView({block:'nearest'})}
       else if(e.key==='ArrowUp'&&opts.length){e.preventDefault();active=Math.max(0,active-1);opts.forEach((x,i)=>x.classList.toggle('active',i===active));opts[active]?.scrollIntoView({block:'nearest'})}
       else if(e.key==='Enter'&&menu.classList.contains('open')){if(active>=0&&current[active]){e.preventDefault();choose(current[active])}else if(current.length===1){e.preventDefault();choose(current[0])}else if(!valid()){e.preventDefault();input.classList.add('db-name-picker-invalid')}}
-      else if(e.key==='Escape')menu.classList.remove('open');
+      else if(e.key==='Escape'){menu.classList.remove('open');markValid()}
     });
-    input.addEventListener('blur',()=>setTimeout(()=>{if(!choosing){menu.classList.remove('open');markValid()}},500));
-    menu.addEventListener('pointerdown',()=>{choosing=true});
-    menu.addEventListener('pointerup',()=>setTimeout(()=>{choosing=false},250));
-    input.__dbNamePicker={valid,open:render};
+    input.__dbNamePicker={valid,open:render,menu};
   }
 
   function scan(){document.querySelectorAll('input').forEach(i=>{if(shouldAttach(i))attach(i)})}
+  document.addEventListener('pointerdown',e=>{
+    document.querySelectorAll('.db-name-picker-menu.open').forEach(menu=>{
+      const wrap=menu.closest('.db-name-picker-wrap');
+      if(!wrap?.contains(e.target)){
+        menu.classList.remove('open');
+        const inp=wrap?.querySelector('input[data-db-name-picker-bound="1"]');
+        if(inp)inp.__dbNamePicker?.valid()||inp.classList.add('db-name-picker-invalid');
+      }
+    });
+  },true);
   document.addEventListener('click',e=>{
     const btn=e.target.closest('button');if(!btn)return;const box=btn.parentElement;const inp=box?.querySelector?.('input[data-db-name-picker-bound="1"]');if(inp&&inp.value.trim()&&!inp.__dbNamePicker.valid()){e.preventDefault();e.stopImmediatePropagation();inp.classList.add('db-name-picker-invalid');inp.focus();inp.__dbNamePicker.open()}
   },true);

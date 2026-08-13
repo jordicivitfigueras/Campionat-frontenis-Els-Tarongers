@@ -807,6 +807,10 @@ body {
   height: 16px;
   display: block;
 }
+/* The supper flow is now part of the single Àpats page. */
+a[href="/sopar"] {
+  display: none !important;
+}
 @media (max-width: 480px) {
   .reservation-row {
     align-items: center;

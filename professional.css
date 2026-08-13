@@ -811,6 +811,42 @@ body {
 a[href="/sopar"] {
   display: none !important;
 }
+.merch-deadline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #f2a33b;
+  color: #173229;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(242, 163, 59, 0.22);
+}
+.module-card[href="/merchandising"] .merch-deadline,
+.workflow-action[href="/merchandising"] .merch-deadline,
+.btn[href="/merchandising"] .merch-deadline {
+  margin-top: 10px;
+  margin-left: 0;
+  width: fit-content;
+  background: #fff0d8;
+  color: #8a5414;
+  border: 1px solid #f0cf9b;
+}
+@media (max-width: 760px) {
+  .app-menu a[href="/merchandising"] {
+    min-width: 104px;
+  }
+  .app-menu a[href="/merchandising"] .merch-deadline {
+    margin: 0;
+    padding: 3px 5px;
+    font-size: 7px;
+  }
+}
 @media (max-width: 480px) {
   .reservation-row {
     align-items: center;

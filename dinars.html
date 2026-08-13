@@ -78,7 +78,7 @@
           <div class="section-head">
             <div>
               <div class="eyebrow">Obert a tothom</div>
-              <h1 class="section-title">Reserva els dinars</h1>
+              <h1 class="section-title">Reserva els àpats</h1>
               <p style="color: #617068">
                 Tria el dinar, indica quantes persones sereu i escriu un nom per
                 a cadascuna.
@@ -139,6 +139,24 @@
                   ><strong>Reservar els dos dinars</strong><br /><span
                     class="meta"
                     >Divendres i dissabte en una sola operació</span
+                  ></span
+                >
+              </label>
+              <label
+                class="payment-box"
+                style="
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  margin-top: 10px;
+                  cursor: pointer;
+                "
+              >
+                <input id="includeDinner" type="checkbox" />
+                <span
+                  ><strong>Afegir el sopar de dissabte</strong><br /><span
+                    class="meta"
+                    >Bocata · 6 € per persona</span
                   ></span
                 >
               </label>
@@ -239,6 +257,7 @@
         return t ? JSON.parse(t) : null;
       }
       let PRICE = 10,
+        DINNER_PRICE = 6,
         OPEN = true,
         reservations = [];
       function esc(s) {
@@ -261,12 +280,15 @@
           (_, i) =>
             `<div class="field"><label>Persona ${i + 1} · Nom</label><input class="personName" placeholder="Nom o nom i cognoms"></div>`,
         ).join("");
-        const days = bothMeals.checked ? 2 : 1;
-        mealTotal.textContent = n * PRICE * days + " €";
-        priceMeta.textContent = `${n} persona${n === 1 ? "" : "es"} · ${days} dinar${days === 1 ? "" : "s"} · ${PRICE} € per persona i dia`;
+        const days = bothMeals.checked ? 2 : 1,
+          total =
+            n * (PRICE * days + (includeDinner.checked ? DINNER_PRICE : 0));
+        mealTotal.textContent = total + " €";
+        priceMeta.textContent = `${n} persona${n === 1 ? "" : "es"} · ${days} dinar${days === 1 ? "" : "s"}${includeDinner.checked ? " + sopar" : ""}`;
       }
       count.oninput = drawPeople;
       bothMeals.onchange = drawPeople;
+      includeDinner.onchange = drawPeople;
       document.querySelectorAll(".meal-card").forEach(
         (b) =>
           (b.onclick = () => {
@@ -352,7 +374,12 @@
                 "af38c060-f814-4195-b29f-ee38697f5abf",
                 "8257e8a4-d780-4a59-ad74-6e0aeff592e0",
               ]
-            : [mealId.value];
+            : [mealId.value],
+          eventIds = includeDinner.checked
+            ? [...ids, "c87024b6-aad6-42bc-bee9-0e452ff5e893"]
+            : ids,
+          totalPerPerson =
+            ids.length * PRICE + (includeDinner.checked ? DINNER_PRICE : 0);
         if (names.some((n) => !n)) {
           sendMsg.innerHTML =
             '<div class="production-note">Falta escriure el nom d’alguna persona.</div>';
@@ -362,7 +389,7 @@
         const dup = names.find((n) =>
           reservations.some(
             (x) =>
-              ids.includes(x.lunch_id) &&
+              eventIds.includes(x.lunch_id) &&
               String(x.full_name).trim().toLowerCase() === n.toLowerCase(),
           ),
         );
@@ -377,7 +404,7 @@
           await publicReq("/rest/v1/lunch_reservations", {
             method: "POST",
             prefer: "return=minimal",
-            body: ids.flatMap((lunch_id) =>
+            body: eventIds.flatMap((lunch_id) =>
               names.map((full_name) => ({
                 lunch_id,
                 full_name,
@@ -387,7 +414,7 @@
               })),
             ),
           });
-          sendMsg.innerHTML = `<div class="success-card"><strong>✓ Reserva registrada</strong><div>${names.length} persona${names.length > 1 ? "es" : ""} · ${ids.length} dinar${ids.length > 1 ? "s" : ""} · ${names.length * PRICE * ids.length} €</div><div class="meta">${sent ? "Has indicat que ja has fet el Bizum; queda pendent de verificació." : "Recorda fer el Bizum a Arnau Costa · +34 677 48 87 48."}</div></div>`;
+          sendMsg.innerHTML = `<div class="success-card"><strong>✓ Reserva registrada</strong><div>${names.length} persona${names.length > 1 ? "es" : ""} · ${ids.length} dinar${ids.length > 1 ? "s" : ""}${includeDinner.checked ? " + sopar" : ""} · ${names.length * totalPerPerson} €</div><div class="meta">${sent ? "Has indicat que ja has fet el Bizum; queda pendent de verificació." : "Recorda fer el Bizum a Arnau Costa · +34 677 48 87 48."}</div></div>`;
           count.value = 1;
           drawPeople();
           bizumName.value = "";

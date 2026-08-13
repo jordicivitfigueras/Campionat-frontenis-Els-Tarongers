@@ -1,1 +1,288 @@
-<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#086443"><title>Sopar dissabte · Campionat Frontenis Els Tarongers 2026</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="professional.css"><style>.supper-hero{background:linear-gradient(135deg,#043a28,#086443);border-radius:28px;padding:34px;color:#fff;box-shadow:var(--shadow);display:grid;grid-template-columns:1.25fr .75fr;gap:24px;align-items:center}.supper-hero h1{font-size:clamp(42px,6vw,70px);line-height:.9;margin:7px 0 12px}.supper-price{font-size:72px;font-weight:950;text-align:center;color:#ffc46e}.supper-price small{display:block;font-size:13px;color:#fff;opacity:.75;text-transform:uppercase;letter-spacing:.08em}.name-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}.name-row button{min-width:44px}.summary-box{background:#edf5f0;border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px}@media(max-width:760px){.supper-hero{grid-template-columns:1fr}.supper-price{text-align:left;font-size:54px}}</style></head><body><main class="page"><div class="container"><section class="section"><div class="supper-hero"><div><div class="eyebrow" style="color:#ffc46e!important">Dissabte 12 de setembre</div><h1>Sopar de bocata</h1><p>Reserva el teu bocata per al sopar de dissabte. Pots inscriure més d’una persona, però cal indicar nom i cognoms de cadascuna.</p></div><div class="supper-price"><span id="price">6 €</span><small>per persona</small></div></div><div id="closed" class="production-note" style="display:none;margin-top:16px"><strong>Reserves tancades</strong><br>L’organització ha tancat les noves reserves del sopar.</div><div class="grid grid-2" style="margin-top:20px"><div class="form-panel" id="formBox"><h2 style="margin-top:0">Reserva</h2><div id="names"></div><button class="btn btn-secondary" style="margin-top:10px;color:#17332a;border:1px solid var(--border)" onclick="addName()">+ Afegir persona</button><div class="field" style="margin-top:16px"><label>Nom des del qual faràs el Bizum</label><input id="bizum" placeholder="Nom i cognoms"></div><div class="summary-box"><strong>Pagament per Bizum</strong><div class="meta" style="margin-top:5px">L'organització validarà el pagament des del panell d'administració.</div></div><div class="actions"><button id="sendBtn" class="btn btn-accent" onclick="send()">Reservar sopar</button></div><div id="msg" style="margin-top:12px"></div></div><div class="form-panel"><div class="eyebrow">Llista pública</div><h2 style="margin-top:6px">Qui està apuntat?</h2><div id="list" class="list"></div></div></div></section></div></main><script src="/config.js"></script><script src="/supabase-sync.js"></script><script>const EVENT_ID='c87024b6-aad6-42bc-bee9-0e452ff5e893';let PRICE=6,OPEN=true;function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}function addName(v=''){const row=document.createElement('div');row.className='name-row';row.innerHTML=`<input class="person" placeholder="Nom i cognoms" value="${esc(v)}"><button class="btn btn-danger" type="button">×</button>`;row.querySelector('button').onclick=()=>row.remove();names.appendChild(row)}async function load(){try{const [ev,rows]=await Promise.all([SupaSync.req(`/rest/v1/lunch_events?id=eq.${EVENT_ID}&select=price,is_open`),SupaSync.req('/rest/v1/rpc/public_lunch_reservations',{method:'POST',body:{}})]);const e=ev?.[0];if(e){PRICE=Number(e.price||6);OPEN=e.is_open!==false}price.textContent=PRICE+' €';formBox.style.display=OPEN?'block':'none';closed.style.display=OPEN?'none':'block';const filtered=(rows||[]).filter(x=>x.lunch_id===EVENT_ID);list.innerHTML=filtered.length?filtered.map(x=>`<div class="list-item"><div><strong>${esc(x.full_name)}</strong><div class="meta">Reserva registrada</div></div><span class="badge ${x.payment_status==='verified'?'green':'orange'}">${x.payment_status==='verified'?'Pagat':x.payment_status==='bizum_sent'?'Bizum enviat':'Pendent'}</span></div>`).join(''):'<div class="list-item">Encara no hi ha reserves.</div>'}catch(e){list.innerHTML='<div class="list-item">No s’ha pogut carregar la llista.</div>'}}async function send(){if(!OPEN)return alert('Les reserves estan tancades.');const people=[...document.querySelectorAll('.person')].map(x=>x.value.trim()).filter(Boolean),b=bizum.value.trim();if(!people.length||people.some(x=>x.split(/\s+/).length<2))return alert('Cal posar nom i cognoms de totes les persones.');if(!b)return alert('Indica el nom del Bizum.');sendBtn.disabled=true;try{const group=crypto.randomUUID();await SupaSync.req('/rest/v1/lunch_reservations',{method:'POST',prefer:'return=representation',body:people.map(full_name=>({lunch_id:EVENT_ID,full_name,reservation_group:group,bizum_name:b,payment_status:'bizum_sent'}))});msg.innerHTML=`<div class="success-card"><strong>✓ Reserva registrada</strong><div>${people.length} persona${people.length>1?'es':''} · ${people.length*PRICE} € en total.</div><div class="meta">Pagament pendent de verificació per l’organització.</div></div>`;names.innerHTML='';addName();bizum.value='';await load()}catch(e){msg.innerHTML='<div class="production-note">No s’ha pogut registrar la reserva. Torna-ho a provar.</div>'}finally{sendBtn.disabled=false}}addName();load();</script><script src="professional-shell.js?v=launch2"></script></body></html>
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#086443" />
+    <title>Sopar dissabte · Campionat Frontenis Els Tarongers 2026</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="professional.css" />
+    <style>
+      .supper-hero {
+        background: linear-gradient(135deg, #043a28, #086443);
+        border-radius: 28px;
+        padding: 34px;
+        color: #fff;
+        box-shadow: var(--shadow);
+        display: grid;
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 24px;
+        align-items: center;
+      }
+      .supper-hero h1 {
+        font-size: clamp(42px, 6vw, 70px);
+        line-height: 0.9;
+        margin: 7px 0 12px;
+      }
+      .supper-price {
+        font-size: 72px;
+        font-weight: 950;
+        text-align: center;
+        color: #ffc46e;
+      }
+      .supper-price small {
+        display: block;
+        font-size: 13px;
+        color: #fff;
+        opacity: 0.75;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .name-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .name-row button {
+        min-width: 44px;
+      }
+      .summary-box {
+        background: #edf5f0;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        margin-top: 14px;
+      }
+      .bizum-phone {
+        font-size: 25px;
+        font-weight: 950;
+        color: #0b5f43;
+        margin-top: 4px;
+      }
+      .meal-card {
+        border: 2px solid #0b5f43;
+        background: #eef7f2;
+        border-radius: 18px;
+        padding: 17px;
+      }
+      .meal-card b {
+        display: block;
+        font-size: 20px;
+        color: #0b5f43;
+      }
+      .people-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .meal-total {
+        font-size: 33px;
+        font-weight: 950;
+        color: #0b5f43;
+      }
+      @media (max-width: 760px) {
+        .supper-hero {
+          grid-template-columns: 1fr;
+        }
+        .supper-price {
+          text-align: left;
+          font-size: 54px;
+        }
+        .people-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="container">
+        <section class="section">
+          <div class="supper-hero">
+            <div>
+              <div class="eyebrow" style="color: #ffc46e !important">
+                Dissabte 12 de setembre
+              </div>
+              <h1>Sopar de bocata</h1>
+              <p>
+                Reserva el teu bocata per al sopar de dissabte. Pots inscriure
+                més d’una persona, però cal indicar nom i cognoms de cadascuna.
+              </p>
+            </div>
+            <div class="supper-price">
+              <span id="price">6 €</span><small>per persona</small>
+            </div>
+          </div>
+          <div
+            id="closed"
+            class="production-note"
+            style="display: none; margin-top: 16px"
+          >
+            <strong>Reserves tancades</strong><br />L’organització ha tancat les
+            noves reserves del sopar.
+          </div>
+          <div class="grid grid-2" style="margin-top: 20px">
+            <div class="form-panel" id="formBox">
+              <div class="meal-card">
+                <span class="meta">Dissabte 12</span><b>Sopar de bocata</b
+                ><span id="mealPrice">6 € per persona</span>
+              </div>
+              <div class="field" style="margin-top: 16px">
+                <label>Nombre de persones</label
+                ><input id="count" type="number" min="1" max="12" value="1" />
+              </div>
+              <div
+                id="names"
+                class="people-grid"
+                style="margin-top: 12px"
+              ></div>
+              <div class="payment-box" style="margin-top: 16px">
+                <div class="meta">Import total</div>
+                <div id="mealTotal" class="meal-total">6 €</div>
+                <div id="priceMeta" class="meta">6 € per persona</div>
+              </div>
+              <div class="field" style="margin-top: 16px">
+                <label>Nom des del qual faràs el Bizum</label
+                ><input id="bizum" placeholder="Nom i cognoms" />
+              </div>
+              <div class="summary-box">
+                <strong>Pagament per Bizum a Jordi Civit</strong>
+                <div class="bizum-phone">+34 634 34 99 80</div>
+                <div class="meta" style="margin-top: 5px">
+                  Indica el teu nom al concepte. Jordi validarà el pagament.
+                </div>
+              </div>
+              <div class="actions">
+                <button id="sendBtn" class="btn btn-accent" onclick="send()">
+                  Reservar sopar
+                </button>
+              </div>
+              <div id="msg" style="margin-top: 12px"></div>
+            </div>
+            <div class="form-panel">
+              <div class="eyebrow">Llista pública</div>
+              <h2 style="margin-top: 6px">Qui està apuntat?</h2>
+              <div id="list" class="list"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="/config.js"></script>
+    <script src="/supabase-sync.js"></script>
+    <script>
+      const EVENT_ID = "c87024b6-aad6-42bc-bee9-0e452ff5e893";
+      let PRICE = 6,
+        OPEN = true,
+        reservations = [];
+      function esc(s) {
+        return String(s || "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            })[c],
+        );
+      }
+      function drawPeople() {
+        const previous = [...document.querySelectorAll(".person")].map(
+            (x) => x.value,
+          ),
+          n = Math.max(1, Math.min(12, parseInt(count.value || 1)));
+        names.innerHTML = Array.from(
+          { length: n },
+          (_, i) =>
+            `<div class="field"><label>Persona ${i + 1} · Nom</label><input class="person" placeholder="Nom i cognoms" value="${esc(previous[i] || "")}"></div>`,
+        ).join("");
+        mealTotal.textContent = n * PRICE + " €";
+      }
+      async function load() {
+        try {
+          const [ev, rows] = await Promise.all([
+            SupaSync.req(
+              `/rest/v1/lunch_events?id=eq.${EVENT_ID}&select=price,is_open`,
+            ),
+            SupaSync.req("/rest/v1/rpc/public_lunch_reservations", {
+              method: "POST",
+              body: {},
+            }),
+          ]);
+          const e = ev?.[0];
+          if (e) {
+            PRICE = Number(e.price || 6);
+            OPEN = e.is_open !== false;
+          }
+          price.textContent = PRICE + " €";
+          mealPrice.textContent = PRICE + " € per persona";
+          priceMeta.textContent = PRICE + " € per persona";
+          drawPeople();
+          formBox.style.display = OPEN ? "block" : "none";
+          closed.style.display = OPEN ? "none" : "block";
+          reservations = (rows || []).filter((x) => x.lunch_id === EVENT_ID);
+          list.innerHTML = reservations.length
+            ? reservations
+                .map(
+                  (x) =>
+                    `<div class="list-item"><div><strong>${esc(x.full_name)}</strong><div class="meta">Reserva registrada</div></div><span class="badge ${x.payment_status === "verified" ? "green" : "orange"}">${x.payment_status === "verified" ? "Pagat" : x.payment_status === "bizum_sent" ? "Bizum enviat" : "Pendent"}</span></div>`,
+                )
+                .join("")
+            : '<div class="list-item">Encara no hi ha reserves.</div>';
+        } catch (e) {
+          list.innerHTML =
+            '<div class="list-item">No s’ha pogut carregar la llista.</div>';
+        }
+      }
+      async function send() {
+        if (!OPEN) return alert("Les reserves estan tancades.");
+        const people = [...document.querySelectorAll(".person")]
+            .map((x) => x.value.trim())
+            .filter(Boolean),
+          b = bizum.value.trim();
+        if (!people.length || people.some((x) => x.split(/\s+/).length < 2))
+          return alert("Cal posar nom i cognoms de totes les persones.");
+        if (!b) return alert("Indica el nom del Bizum.");
+        sendBtn.disabled = true;
+        try {
+          const group = crypto.randomUUID();
+          const duplicate = people.find((name) =>
+            reservations.some(
+              (row) =>
+                row.full_name.trim().toLowerCase() === name.toLowerCase(),
+            ),
+          );
+          if (duplicate) throw new Error(`${duplicate} ja consta al sopar.`);
+          await SupaSync.req("/rest/v1/lunch_reservations", {
+            method: "POST",
+            prefer: "return=minimal",
+            body: people.map((full_name) => ({
+              lunch_id: EVENT_ID,
+              full_name,
+              reservation_group: group,
+              bizum_name: b,
+              payment_status: "bizum_sent",
+            })),
+          });
+          await load();
+          msg.innerHTML = `<div class="success-card"><strong>✓ Reserva registrada</strong><div>${people.length} persona${people.length > 1 ? "es" : ""} · ${people.length * PRICE} € en total.</div><div class="meta">Bizum a Jordi Civit · pendent de verificació. La reserva continuarà visible després de recarregar.</div></div>`;
+          names.innerHTML = "";
+          count.value = 1;
+          drawPeople();
+          bizum.value = "";
+        } catch (e) {
+          msg.innerHTML = `<div class="production-note">${esc(e.message || "No s’ha pogut registrar la reserva. Torna-ho a provar.")}</div>`;
+        } finally {
+          sendBtn.disabled = false;
+        }
+      }
+      count.oninput = drawPeople;
+      drawPeople();
+      load();
+    </script>
+    <script src="professional-shell.js?v=launch2"></script>
+  </body>
+</html>

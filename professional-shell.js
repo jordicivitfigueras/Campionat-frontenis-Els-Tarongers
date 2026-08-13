@@ -181,6 +181,20 @@
   document.body.innerHTML = "";
   document.body.appendChild(shell);
   old.forEach((n) => shell.querySelector(".app-content").appendChild(n));
+  function decorateMerchandisingLinks() {
+    document.querySelectorAll('a[href="/merchandising"]').forEach((link) => {
+      if (link.querySelector(".merch-deadline")) return;
+      const badge = document.createElement("span");
+      badge.className = "merch-deadline";
+      badge.textContent = "Fins 25 agost";
+      link.appendChild(badge);
+    });
+  }
+  decorateMerchandisingLinks();
+  new MutationObserver(decorateMerchandisingLinks).observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
   const mobileBtn = document.getElementById("mobileMenuBtn"),
     mobileBack = document.getElementById("mobileBackBtn"),
     mobileOverlay = document.getElementById("mobileMenuOverlay");

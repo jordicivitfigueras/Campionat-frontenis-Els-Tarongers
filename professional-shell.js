@@ -55,8 +55,7 @@
         items: [
           ["/inscripcio", "✓", "Inscripció"],
           ["/socis", "♡", "Socis"],
-          ["/dinars", "🥘", "Dinars"],
-          ["/sopar", "🍽", "Sopar dissabte"],
+          ["/dinars", "🥘", "Àpats"],
           ["/merchandising", "👕", "Merchandising"],
         ],
       },
@@ -130,8 +129,7 @@
     pageMap = {
       "/": "Inici",
       "/el-meu-torneig": "El meu torneig",
-      "/dinars": "Dinars",
-      "/sopar": "Sopar dissabte",
+      "/dinars": "Àpats",
       "/merchandising": "Merchandising",
       "/inscripcio": "Inscripció",
       "/socis": "Socis",
@@ -148,18 +146,23 @@
       ? "clock"
       : href.includes("pagament") || href.includes("socis")
         ? "user"
-        : href.includes("dinars") || href.includes("sopar") || href.includes("agora")
+        : href.includes("dinars") ||
+            href.includes("sopar") ||
+            href.includes("agora")
           ? "food"
           : href.includes("configuracio") || href === "/admin"
             ? "settings"
-            : href.includes("resultats") || href.includes("quadre") || href.includes("historic")
+            : href.includes("resultats") ||
+                href.includes("quadre") ||
+                href.includes("historic")
               ? "grid"
               : "circle";
     const paths = {
       clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
       user: '<circle cx="12" cy="8" r="3"/><path d="M6.5 19c.7-3.2 2.5-5 5.5-5s4.8 1.8 5.5 5"/>',
       food: '<path d="M7 4v7M4.5 4v4.5A2.5 2.5 0 0 0 7 11v9M17 4v16M17 4c-3 2-3 7 0 9"/>',
-      settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/>',
+      settings:
+        '<circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/>',
       grid: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
       circle: '<circle cx="12" cy="12" r="8"/><path d="m9 12 2 2 4-4"/>',
     };
@@ -340,7 +343,7 @@
           isDinner = title.includes("sopar");
         row.insertAdjacentHTML(
           "beforeend",
-          `<a class="workflow-action secondary" href="${isDinner ? "/sopar" : "/dinars"}">Gestionar →</a>`,
+          '<a class="workflow-action secondary" href="/dinars">Gestionar →</a>',
         );
       });
       const identity = result.querySelector(".identity");
@@ -352,7 +355,7 @@
           hasDinner = mealText.some((x) => x.includes("sopar"));
         identity.insertAdjacentHTML(
           "beforeend",
-          `<div class="workflow-next"><div class="eyebrow">Següents passos</div><h3>Continua el teu workflow</h3><div class="workflow-next-grid"><a class="workflow-action secondary" href="/dinars">🥘 ${hasLunch ? "Revisar dinars" : "Reservar dinars"}</a><a class="workflow-action secondary" href="/sopar">🍽 ${hasDinner ? "Revisar sopar" : "Reservar sopar"}</a><a class="workflow-action secondary" href="/merchandising">👕 Merchandising</a></div></div>`,
+          `<div class="workflow-next"><div class="eyebrow">Següents passos</div><h3>Continua el teu workflow</h3><div class="workflow-next-grid"><a class="workflow-action secondary" href="/dinars">🥘 ${hasLunch || hasDinner ? "Revisar àpats" : "Reservar àpats"}</a><a class="workflow-action secondary" href="/merchandising">👕 Merchandising</a></div></div>`,
         );
       }
     }
@@ -398,16 +401,29 @@
             personFilled = true;
           }
           if (isIdentityField(inp) && !inp.value) {
-            if ((inp.classList.contains("personName") || inp.classList.contains("person")) && personFilled) return;
+            if (
+              (inp.classList.contains("personName") ||
+                inp.classList.contains("person")) &&
+              personFilled
+            )
+              return;
             inp.value = saved;
             inp.dispatchEvent(new Event("input", { bubbles: true }));
-            if (inp.classList.contains("personName") || inp.classList.contains("person")) personFilled = true;
+            if (
+              inp.classList.contains("personName") ||
+              inp.classList.contains("person")
+            )
+              personFilled = true;
           }
         });
       }
       const remember = (e) => {
         const inp = e.target;
-        if (!isAdmin && inp instanceof HTMLInputElement && isIdentityField(inp)) {
+        if (
+          !isAdmin &&
+          inp instanceof HTMLInputElement &&
+          isIdentityField(inp)
+        ) {
           const name = inp.value.trim();
           if (name.length >= 2) MyIdentity.set(name);
         }

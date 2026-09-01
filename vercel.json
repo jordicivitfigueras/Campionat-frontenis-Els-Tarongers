@@ -1,12 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "redirects": [
-    { "source": "/sopar", "destination": "/dinars", "permanent": true }
-  ],
   "rewrites": [
     { "source": "/inscripcio", "destination": "/inscripcio.html" },
     { "source": "/alta-soci", "destination": "/socis.html" },
     { "source": "/dinars", "destination": "/dinars.html" },
+    { "source": "/sopar", "destination": "/sopar-independent.html" },
     { "source": "/merchandising", "destination": "/merch.html" },
     { "source": "/directe", "destination": "/directe.html" },
     { "source": "/horaris", "destination": "/horaris.html" },
@@ -33,20 +31,11 @@
     { "source": "/admin/pagaments", "destination": "/admin-pagaments.html" },
     { "source": "/admin/socis", "destination": "/admin-socis.html" },
     { "source": "/admin/dinars", "destination": "/admin-dinars.html" },
-    {
-      "source": "/admin/merchandising",
-      "destination": "/admin-merchandising.html"
-    },
+    { "source": "/admin/merchandising", "destination": "/admin-merchandising.html" },
     { "source": "/admin/mvp", "destination": "/admin-mvp.html" },
     { "source": "/admin/avisos", "destination": "/admin-avisos.html" },
     { "source": "/admin/salut", "destination": "/admin-salut.html" },
-    {
-      "source": "/admin/configuracio",
-      "destination": "/admin-configuracio.html"
-    },
-    {
-      "source": "/admin/exportacions",
-      "destination": "/admin-exportacions.html"
-    }
+    { "source": "/admin/configuracio", "destination": "/admin-configuracio.html" },
+    { "source": "/admin/exportacions", "destination": "/admin-exportacions.html" }
   ]
 }

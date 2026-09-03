@@ -1,4 +1,116 @@
 .lang-switch{display:flex;gap:4px;align-items:center;margin-left:auto}.lang-switch button{border:1px solid rgba(11,95,67,.18);background:#fff;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:950;color:#5d6b64;cursor:pointer}.lang-switch button.active{background:#0b5f43;color:#fff;border-color:#0b5f43}.mobile-bottom-nav{display:none}.ux-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);opacity:0;pointer-events:none;background:#10251d;color:#fff;padding:13px 18px;border-radius:14px;font-weight:850;font-size:13px;box-shadow:0 18px 50px rgba(0,0,0,.25);z-index:9999;transition:.18s}.ux-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.ux-share{display:inline-flex;align-items:center;gap:7px}.ux-status{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:900;color:#587067}.ux-status-dot{width:8px;height:8px;border-radius:50%;background:#20a46c;box-shadow:0 0 0 4px rgba(32,164,108,.12)}.stepper{display:flex;gap:8px;margin-bottom:18px}.step-pill{flex:1;padding:9px 10px;border-radius:12px;background:#eef3f0;color:#63736b;font-size:11px;font-weight:900;text-align:center}.step-pill.active{background:#0b5f43;color:#fff}.success-card{background:#eff9f4;border:1px solid #b7e2ca;border-radius:18px;padding:18px}.success-card strong{display:block;color:#086443;font-size:20px;margin-bottom:4px}.context-banner{border-radius:20px;padding:18px 20px;background:linear-gradient(135deg,#0b5f43,#073c2c);color:#fff;margin-bottom:18px}.context-banner a{color:#fff}.context-banner .meta{color:rgba(255,255,255,.7)}.countdown{font-size:12px;font-weight:900;color:#0b5f43;background:#eaf5ef;padding:6px 9px;border-radius:999px;display:inline-block}.compact-event{display:grid;grid-template-columns:78px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 15px;margin:8px 0}.compact-event.social{background:#fff8e9;border-color:#efd6aa}.compact-event .time{font-size:19px;font-weight:950;color:#0b5f43}.compact-event .kind{font-size:10px;font-weight:950;text-transform:uppercase;color:#7b8a83}.card-click{transition:.15s transform,.15s box-shadow}.card-click:active{transform:scale(.985)}
 .app-content .btn,.app-content button.btn,.app-content a.btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;line-height:1.15!important;vertical-align:middle!important}
 .app-menu .nav-icon svg{display:none!important}.app-menu .nav-icon:before{font-size:14px;line-height:1;font-weight:900}.app-menu a[href="/"] .nav-icon:before{content:"⌂"}.app-menu a[href="/inscripcio"] .nav-icon:before{content:"✓"}.app-menu a[href="/socis"] .nav-icon:before{content:"♙"}.app-menu a[href="/dinars"] .nav-icon:before{content:"♨"}.app-menu a[href="/merchandising"] .nav-icon:before{content:"♧"}.app-menu a[href="/el-meu-torneig"] .nav-icon:before{content:"⌕"}.app-menu a[href="/directe"] .nav-icon:before{content:"◉"}.app-menu a[href="/horaris"] .nav-icon:before{content:"◷"}.app-menu a[href="/resultats"] .nav-icon:before{content:"♜"}.app-menu a[href="/quadre"] .nav-icon:before{content:"⌘"}.app-menu a[href="/mvp"] .nav-icon:before{content:"★"}.app-menu a[href="/historic"] .nav-icon:before{content:"↶"}.app-menu a[href="/fotos"] .nav-icon:before{content:"▧"}.app-menu a[href="/informacio"] .nav-icon:before{content:"i"}.app-menu a[href="/avisos"] .nav-icon:before{content:"!"}.app-menu a[href="/organitzacio"] .nav-icon:before{content:"◆"}.app-menu a[href="/patrocinadors"] .nav-icon:before{content:"♥"}.app-menu a[href="/agora"] .nav-icon:before{content:"☕"}.app-menu a[href="/admin"] .nav-icon:before{content:"⚙"}
-@media(max-width:760px){body{padding-bottom:74px}.app-content{padding-bottom:84px!important}.mobile-bottom-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:8px;right:8px;bottom:8px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border:1px solid rgba(11,95,67,.14);border-radius:18px;box-shadow:0 18px 55px rgba(0,0,0,.18);z-index:500;padding:6px}.mobile-bottom-nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 2px;border-radius:12px;color:#5f7068;text-decoration:none;font-size:9px;font-weight:900}.mobile-bottom-nav a span{font-size:18px;line-height:1}.mobile-bottom-nav a.active{background:#edf5f1;color:#0b5f43}.app-head{gap:8px}.app-head-badge{display:none}.lang-switch button{padding:6px 9px}.ux-toast{bottom:92px;width:calc(100% - 32px);text-align:center}.stepper{overflow:auto}.step-pill{min-width:105px}.compact-event{grid-template-columns:62px 1fr}.compact-event>:last-child{grid-column:2}.desktop-only{display:none!important}}
+
+/* UX 2026.09 — global usability layer */
+:root{--ux-hit:46px;--ux-focus:0 0 0 4px rgba(11,95,67,.12);--ux-danger:#b42318;--ux-soft:#f7faf8;--ux-soft-green:#eef7f2;--ux-soft-orange:#fff6e8}
+body{font-size:15px}
+.app-content{max-width:1600px;margin:0 auto}
+.app-content h1,.app-content h2,.app-content h3{line-height:1.08}
+.app-content p{max-width:78ch}
+.app-content .admin-hero,.app-content .public-hero{margin-bottom:24px!important}
+.app-content .admin-hero h1{margin:4px 0 8px!important}
+.app-content .admin-hero p{margin:0!important;color:#60736a!important}
+.app-content .admin-status-row{margin-top:14px!important;display:flex!important;gap:8px!important;flex-wrap:wrap!important}
+.app-content .admin-status{border-radius:999px!important;padding:7px 10px!important;background:#fff!important;border:1px solid #dfe8e3!important;font-size:10px!important;font-weight:850!important}
+
+/* Cards: clearer hierarchy */
+.app-content .quick-card,.app-content .form-panel,.app-content .panel,.app-content .public-card,.app-content .module-card{box-shadow:0 6px 20px rgba(15,58,42,.055)!important}
+.app-content .quick-card{min-height:106px;display:flex;flex-direction:column;justify-content:center}
+.app-content .dashboard-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))!important}
+.app-content .grid{gap:14px!important}
+.app-content .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.app-content .form-panel h2{font-size:18px!important;margin:0 0 16px!important;color:#073e2d!important}
+.app-content .admin-section-title{margin:28px 0 12px!important;display:flex!important;align-items:end!important;justify-content:space-between!important;gap:12px!important}
+.app-content .admin-section-title h2{margin:3px 0 0!important}
+
+/* Forms: larger and easier to understand */
+.app-content .field{display:flex!important;flex-direction:column!important;gap:7px!important}
+.app-content .form-grid{gap:12px!important}
+.app-content input,.app-content select,.app-content textarea{min-height:var(--ux-hit)!important;padding:10px 12px!important;font-size:13px!important}
+.app-content input::placeholder,.app-content textarea::placeholder{color:#95a39d!important}
+.app-content input:focus,.app-content select:focus,.app-content textarea:focus{box-shadow:var(--ux-focus)!important;outline:none!important}
+.app-content label{font-size:10px!important;letter-spacing:.065em!important}
+.app-content .actions,.app-content .admin-actions,.app-content .actions-row,.app-content .pay-actions{gap:8px!important}
+.app-content .actions{margin-top:16px!important}
+
+/* Buttons: explicit primary/secondary/destructive */
+.app-content .btn{min-height:var(--ux-hit)!important;padding:11px 16px!important;border-radius:11px!important;font-size:12px!important;cursor:pointer!important}
+.app-content .btn:focus-visible,.app-content button:focus-visible,.app-content a:focus-visible{outline:none!important;box-shadow:var(--ux-focus)!important}
+.app-content .btn-primary,.app-content .btn-accent{font-weight:900!important}
+.app-content .btn-secondary:hover{background:var(--ux-soft-green)!important;border-color:#bed8ca!important}
+.app-content button[onclick*="delete"],.app-content button[onclick*="deactivate"],.app-content button[onclick*="Eliminar"],.app-content .delete-btn{color:var(--ux-danger)!important;border-color:#efc9c5!important;background:#fff8f7!important}
+.app-content button[onclick*="delete"]:hover,.app-content button[onclick*="deactivate"]:hover,.app-content .delete-btn:hover{background:#ffefed!important}
+
+/* Tables: easier scanning */
+.app-content .table-wrap,.app-content .form-panel[style*="overflow:auto"]{border-radius:16px!important}
+.app-content .admin-table{border-collapse:separate!important;border-spacing:0!important;width:100%!important}
+.app-content .admin-table thead th{position:sticky;top:0;z-index:3;background:#f5f9f7!important;color:#496058!important;font-size:9px!important;letter-spacing:.08em!important;text-transform:uppercase!important;border-bottom:1px solid #d9e5df!important;padding:11px 12px!important;white-space:nowrap}
+.app-content .admin-table td{padding:12px!important;vertical-align:middle!important;border-bottom:1px solid #edf2ef!important;font-size:12px!important}
+.app-content .admin-table tbody tr:nth-child(even){background:#fbfdfc!important}
+.app-content .admin-table tbody tr:hover{background:#f2f8f5!important}
+.app-content .admin-table tbody tr:last-child td{border-bottom:0!important}
+.app-content .admin-table strong{color:#123c2d!important}
+
+/* Statuses */
+.app-content .badge{white-space:nowrap!important;font-weight:900!important}
+.app-content .badge.green{background:#e8f6ee!important;color:#087348!important;border-color:#bfe3cf!important}
+.app-content .badge.orange{background:var(--ux-soft-orange)!important;color:#945c12!important;border-color:#edd4a9!important}
+.app-content .badge.red{background:#fff0ef!important;color:#a52d25!important;border-color:#efc9c5!important}
+.app-content .meta{line-height:1.45!important}
+
+/* Public pages: obvious next action */
+.app-content .public-hero .btn,.app-content .context-banner .btn{box-shadow:0 8px 22px rgba(0,0,0,.12)!important}
+.app-content .module-card,.app-content .public-card,.app-content .product{cursor:default}
+.app-content a.module-card,.app-content a.public-card,.app-content a.product{cursor:pointer}
+.app-content a.module-card:after,.app-content a.public-card:after{content:"→";margin-top:auto;padding-top:14px;font-weight:950;color:#0b5f43;font-size:18px}
+
+/* Search/filter panels */
+.app-content .search-panel,.app-content .form-panel:has(#search),.app-content .form-panel:has([id*="Filter"]){background:#fbfdfc!important}
+.app-content input[type="search"],.app-content input[id*="Search"],.app-content input[id="search"]{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2371847b' stroke-width='2'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 4 4'/%3E%3C/svg%3E") no-repeat 12px center!important;padding-left:38px!important}
+
+/* Sidebar and header */
+.app-menu a{min-height:43px!important;font-size:12px!important}
+.app-menu a.is-active{font-weight:900!important}
+.app-head{height:64px!important}
+.app-head strong{font-size:15px!important}
+.app-head-badge{font-size:9px!important}
+
+/* Empty states */
+.app-content tbody tr td[colspan],.app-content .my-name-empty{padding:28px 18px!important;text-align:center!important;color:#71847b!important}
+
+/* Mobile: make every page usable with one thumb */
+@media(max-width:900px){
+  .app-content .grid-2{grid-template-columns:1fr!important}
+  .app-content .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .app-content .admin-table{min-width:760px}
+  .app-content .form-panel{padding:16px!important}
+}
+@media(max-width:760px){
+  body{padding-bottom:82px}
+  .app-content{padding:16px 12px 96px!important}
+  .app-content .section{padding-bottom:28px!important}
+  .app-content .admin-hero,.app-content .public-hero{border-radius:18px!important;padding:22px 18px!important;margin-bottom:14px!important}
+  .app-content .admin-hero h1,.app-content .public-hero h1{font-size:30px!important;line-height:1.02!important}
+  .app-content .admin-hero p,.app-content .public-hero p{font-size:13px!important}
+  .app-content .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  .app-content .quick-card{padding:14px!important;min-height:92px!important}
+  .app-content .quick-card .qvalue{font-size:25px!important}
+  .app-content .quick-card .qtitle{font-size:8px!important}
+  .app-content .btn{width:100%;min-height:48px!important;font-size:13px!important}
+  .app-content .actions,.app-content .admin-actions,.app-content .actions-row,.app-content .pay-actions{display:grid!important;grid-template-columns:1fr!important;width:100%!important}
+  .app-content .field{width:100%!important}
+  .app-content input,.app-content select,.app-content textarea{font-size:16px!important;min-height:48px!important}
+  .app-content .admin-section-title{align-items:flex-start!important;flex-direction:column!important;margin-top:22px!important}
+  .app-content .admin-table{min-width:700px!important}
+  .app-content .table-wrap,.app-content .form-panel[style*="overflow:auto"]{margin-left:-4px!important;margin-right:-4px!important;border-radius:14px!important;box-shadow:inset -18px 0 20px -22px rgba(0,0,0,.35)!important}
+  .app-content .admin-table td{padding:11px 10px!important}
+  .app-head{height:58px!important;padding:0 12px!important}
+  .app-head strong{font-size:13px!important;max-width:58vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mobile-bottom-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:8px;right:8px;bottom:8px;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border:1px solid rgba(11,95,67,.14);border-radius:18px;box-shadow:0 18px 55px rgba(0,0,0,.18);z-index:500;padding:6px}.mobile-bottom-nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 2px;border-radius:12px;color:#5f7068;text-decoration:none;font-size:9px;font-weight:900;min-height:52px}.mobile-bottom-nav a span{font-size:18px;line-height:1}.mobile-bottom-nav a.active{background:#edf5f1;color:#0b5f43}.app-head{gap:8px}.app-head-badge{display:none}.lang-switch button{padding:6px 9px}.ux-toast{bottom:96px;width:calc(100% - 32px);text-align:center}.stepper{overflow:auto}.step-pill{min-width:105px}.compact-event{grid-template-columns:62px 1fr}.compact-event>:last-child{grid-column:2}.desktop-only{display:none!important}
+}
+@media(max-width:430px){
+  .app-content .dashboard-grid{grid-template-columns:1fr 1fr!important}
+  .app-content .quick-card .qvalue{font-size:22px!important}
+  .app-content .public-hero{padding:20px 16px!important}
+}

@@ -33,6 +33,8 @@ Portal web del campionat, amb una zona pública i una zona d'organització.
 - Fotos: Dropbox
 
 ## Estat actual
-El frontend és usable i responsive. Les dades encara funcionen principalment amb `localStorage`, així que abans d'utilitzar-lo com a sistema multiusuari real cal crear el projecte Supabase, executar `schema.sql` i connectar `config.js`.
+El frontend és usable, responsive i sincronitzat amb Supabase. El format 2026 té 8 grups de primera fase (A–H), 8 grups de segona fase (I–P) i eliminatòries des de quarts; en total, 56 partits.
+
+Els caps de sèrie 1–8 no juguen la primera fase. Les parelles 9–16 encapçalen els grups A–H amb dues parelles més; passen les dues primeres. A la segona fase passa només el líder de cada grup. Els quarts són I–M, J–N, K–O i L–P, i les semifinals minimitzen la repetició de rivals.
 
 Veure `CHECKLIST_CAMPIONAT.md` per a la llista exacta de tasques de producció.

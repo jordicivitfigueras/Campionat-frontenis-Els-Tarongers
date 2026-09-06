@@ -354,6 +354,16 @@
       await SupaSync.init();
       await setupMyTournamentPicker();
       setupWorkflowActions();
+      if (path === "/el-meu-torneig") {
+        let profileRefreshTimer;
+        window.addEventListener("supabase:change", () => {
+          clearTimeout(profileRefreshTimer);
+          profileRefreshTimer = setTimeout(() => {
+            const saved = MyIdentity.get();
+            if (saved && typeof window.run === "function") window.run(saved);
+          }, 180);
+        });
+      }
       await loadScript("/name-picker.js?v=identity4").catch(() => {});
       const identityFields = new Set([
         "p1",

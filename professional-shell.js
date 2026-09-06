@@ -41,7 +41,7 @@
       );
     },
   };
-  ["brand-logo.css", "ux2.css", "mobile-nav.css"].forEach((f) => {
+  ["brand-logo.css", "ux2.css", "mobile-nav.css", "ux-overhaul.css"].forEach((f) => {
     if (!document.querySelector(`link[href*="${f}"]`)) {
       const l = document.createElement("link");
       l.rel = "stylesheet";
@@ -50,44 +50,8 @@
     }
   });
   const publicGroups = [
-      {
-        label: "Participa",
-        items: [
-          ["/inscripcio", "✓", "Inscripció"],
-          ["/socis", "♡", "Socis"],
-          ["/dinars", "🥘", "Àpats"],
-          ["/merchandising", "👕", "Merchandising"],
-        ],
-      },
-      {
-        label: "Torneig",
-        items: [
-          ["/", "⌂", "Inici"],
-          ["/el-meu-torneig", "⌕", "El meu torneig"],
-          ["/directe", "●", "En directe"],
-          ["/horaris", "◷", "Horaris"],
-          ["/resultats", "▣", "Resultats"],
-          ["/quadre", "⌘", "Quadre"],
-        ],
-      },
-      {
-        label: "Comunitat",
-        items: [
-          ["/mvp", "★", "MVP"],
-          ["/historic", "♛", "Històric"],
-          ["/fotos", "▧", "Fotos"],
-        ],
-      },
-      {
-        label: "Més",
-        items: [
-          ["/informacio", "ⓘ", "Informació"],
-          ["/avisos", "◌", "Avisos"],
-          ["/organitzacio", "◆", "Organització"],
-          ["/patrocinadors", "♡", "Patrocinadors"],
-          ["/agora", "☕", "Àgora"],
-        ],
-      },
+      {label:"Torneig",items:[["/el-meu-torneig","⌕","El meu torneig"],["/directe","●","En directe"],["/horaris","◷","Horaris"],["/quadre","⌘","Quadre"]]},
+      {label:"Més",items:[["/","⌂","Inici"],["/resultats","▣","Resultats"],["/avisos","◌","Avisos"],["/dinars","🥘","Àpats"],["/historic","♛","Rànquing i històric"],["/informacio","ⓘ","Informació"],["/merchandising","👕","Merchandising"],["/mvp","★","MVP"],["/fotos","▧","Fotos"],["/patrocinadors","♡","Patrocinadors"]]},
     ],
     adminGroups = [
       {
@@ -460,6 +424,16 @@
 
 if (location.pathname.replace(/\.html$/, "") === "/el-meu-torneig") {
   const possibleMatches = document.createElement("script");
-  possibleMatches.src = "/el-meu-torneig-possibles.js?v=3";
+  possibleMatches.src = "/el-meu-torneig-possibles.js?v=ux-final-1";
   document.head.appendChild(possibleMatches);
+}
+if (location.pathname.replace(/\.html$/, "") === "/quadre") {
+  const dynamicDraw = document.createElement("script");
+  dynamicDraw.src = "/quadre-dynamic.js?v=ux-final-1";
+  document.head.appendChild(dynamicDraw);
+}
+if ((location.pathname.replace(/\.html$/, "") || "/") === "/") {
+  const homePersonal = document.createElement("script");
+  homePersonal.src = "/home-personal.js?v=ux-final-1";
+  document.head.appendChild(homePersonal);
 }

@@ -3,6 +3,7 @@
   if(typeof baseRender!=='function')return;
   const days={'Dijous 10':1,'Divendres 11':2,'Dissabte 12':3};
   const qMap={V1:'Q1',V3:'Q1',V2:'Q2',V4:'Q2',V5:'Q3',V7:'Q3',V6:'Q4',V8:'Q4'};
+  const rankingPoints=[165,165,140,100,100,45,40,25,10,30,0,15,5,20,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   const safe=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const stamp=m=>{const p=String(m?.scheduled_at||'').split(' · '),hm=(p[1]||'99:99').split(':');return(days[p[0]]||9)*10000+(+hm[0]||99)*60+(+hm[1]||0)};
   const pairIn=(m,id)=>m&&(m.team1_id===id||m.team2_id===id);
@@ -25,8 +26,8 @@
     const box=document.createElement('div');box.innerHTML=baseRender(player,d);
     const names=new Map(d.players.map(p=>[p.id,p.full_name])),pair=d.pairs.find(p=>p.player1_id===player.id||p.player2_id===player.id);
     if(!pair)return box.innerHTML;
-    const tier=pair.seed<=8?`Cap de sèrie #${pair.seed} · Accés directe a la 2a fase`:pair.seed<=16?`Cap de sèrie #${pair.seed} · Cap de grup de la 1a fase`:`Parella #${pair.seed} · Primera fase de grups`;
-    const identityTop=box.querySelector('.identity-top');if(identityTop){const seedInfo=document.createElement('div');seedInfo.style.cssText='margin-top:14px;background:#edf7f2;border:1px solid #c6e4d4;border-radius:14px;padding:12px 14px;font-weight:950;color:#0b6b49';seedInfo.textContent=tier;identityTop.insertAdjacentElement('afterend',seedInfo)}
+    const points=rankingPoints[pair.seed-1]||0,tier=pair.seed<=8?`Cap de sèrie #${pair.seed} · ${points} punts · Accés directe a la 2a fase`:pair.seed<=16?`Cap de sèrie #${pair.seed} · ${points} punts · Cap de grup de la 1a fase`:`Parella #${pair.seed} · ${points} punts · Primera fase de grups`;
+    const identityTop=box.querySelector('.identity-top');if(identityTop){const seedInfo=document.createElement('div');seedInfo.style.cssText='margin-top:14px;background:#edf7f2;border:1px solid #c6e4d4;border-radius:14px;padding:12px 14px;font-weight:950;color:#0b6b49';seedInfo.innerHTML=`${safe(tier)}<small style="display:block;margin-top:5px;color:#63736b;font-weight:750">Punts de la parella al Hall of Fame, sumats de les edicions 2022–2025. <a href="/historic">Veure l’origen dels punts</a></small>`;identityTop.insertAdjacentElement('afterend',seedInfo)}
     const fixedTop=new Set(topSeedMatches(pair.seed)),confirmed=d.matches.filter(m=>m.status!=='final'&&(pairIn(m,pair.id)||fixedTop.has(m.id))).sort((a,b)=>stamp(a)-stamp(b)),next=confirmed[0],nextBox=box.querySelector('.next-match');
     if(nextBox&&next)nextBox.innerHTML=`<div class="stage">${safe(next.stage||next.id)} · ${safe(next.id)}</div><div class="when">${safe(next.scheduled_at||'Horari pendent')}</div><div style="font-weight:950;color:#173d30;margin-top:7px">Rival: ${safe(pairIn(next,pair.id)?other(next,pair.id,names):'Per definir')}</div><div class="meta" style="margin-top:5px">Pista 1</div>`;
     const possible=possibleRows(pair,d,confirmed,next),mainPanel=box.querySelector('.main-grid .panel');

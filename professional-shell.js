@@ -457,3 +457,9 @@
     })
     .catch(() => {});
 })();
+
+if (location.pathname.replace(/\.html$/, "") === "/el-meu-torneig") {
+  const possibleMatches = document.createElement("script");
+  possibleMatches.src = "/el-meu-torneig-possibles.js?v=1";
+  document.head.appendChild(possibleMatches);
+}

@@ -44,8 +44,8 @@
                 <button class="meal-card" data-id="8257e8a4-d780-4a59-ad74-6e0aeff592e0" data-title="Dissabte · Paella" data-kind="lunch">
                   <span class="meta">Dissabte 12</span><b>Paella</b><span class="meal-price lunch-price">10 € · beguda no inclosa</span>
                 </button>
-                <button class="meal-card" data-id="c87024b6-aad6-42bc-bee9-0e452ff5e893" data-title="Dissabte · Sopar" data-kind="dinner">
-                  <span class="meta">Dissabte 12 · vespre</span><b>Sopar</b><span class="meal-price">6 € per persona</span>
+                <button class="meal-card" data-id="c87024b6-aad6-42bc-bee9-0e452ff5e893" data-title="Dissabte · Bocata de botifarra a la brasa" data-kind="dinner">
+                  <span class="meta">Dissabte 12 · 21.35–23.35 · sota demanda</span><b>Bocata de botifarra a la brasa</b><span class="meal-price">6 € per persona · reserva fins divendres 11</span>
                 </button>
               </div>
               <input id="mealId" type="hidden" value="af38c060-f814-4195-b29f-ee38697f5abf" />
@@ -103,7 +103,8 @@
       const FRIDAY_ID = "af38c060-f814-4195-b29f-ee38697f5abf";
       const SATURDAY_ID = "8257e8a4-d780-4a59-ad74-6e0aeff592e0";
       const DINNER_ID = "c87024b6-aad6-42bc-bee9-0e452ff5e893";
-      let PRICE = 10, DINNER_PRICE = 6, OPEN = true, reservations = [];
+      const BOCATA_DEADLINE = new Date("2026-09-11T23:59:59+02:00");
+      let PRICE = 10, DINNER_PRICE = 6, GENERAL_OPEN = true, events = [], reservations = [];
 
       const $ = (id) => document.getElementById(id);
       const count = $("count"), people = $("people"), bothMeals = $("bothMeals"), bothMealsBox = $("bothMealsBox");
@@ -128,6 +129,20 @@
       }
 
       function selectedPrice() { return mealKind.value === "dinner" ? DINNER_PRICE : PRICE; }
+      function selectedEvent() { return events.find(e => e.id === mealId.value); }
+      function selectedOpen() {
+        const event = selectedEvent();
+        const beforeDeadline = mealKind.value !== "dinner" || Date.now() <= BOCATA_DEADLINE.getTime();
+        return GENERAL_OPEN && event?.is_open !== false && beforeDeadline;
+      }
+      function applyAvailability() {
+        const open = selectedOpen();
+        reservationForm.style.display = open ? "block" : "none";
+        closed.style.display = open ? "none" : "block";
+        if (!open) closed.innerHTML = mealKind.value === "dinner" && Date.now() > BOCATA_DEADLINE.getTime()
+          ? "<strong>Reserva del bocata tancada</strong><br />L’últim dia per reservar-lo per la web era divendres 11."
+          : "<strong>Reserves tancades</strong><br />Aquest àpat no admet noves reserves en aquest moment.";
+      }
 
       function drawPeople() {
         const n = Math.max(1, Math.min(12, parseInt(count.value || 1, 10)));
@@ -150,6 +165,7 @@
         bothMeals.checked = false;
         bothMealsBox.style.display = isDinner ? "none" : "flex";
         $("bizumTitle").textContent = isDinner ? "Pagament del sopar per Bizum a Arnau Costa" : "Pagament del dinar per Bizum a Arnau Costa";
+        applyAvailability();
         drawPeople();
         renderList();
       }
@@ -162,12 +178,16 @@
 
       async function loadConfig() {
         try {
-          const cfg = (await publicReq("/rest/v1/tournament_config?id=eq.2026&select=meal_price,lunch_open", {prefer:"return=representation"}))?.[0];
-          if (cfg) { PRICE = Number(cfg.meal_price || 10); OPEN = cfg.lunch_open !== false; }
+          const [cfg, loadedEvents] = await Promise.all([
+            publicReq("/rest/v1/tournament_config?id=eq.2026&select=meal_price,lunch_open", {prefer:"return=representation"}),
+            publicReq("/rest/v1/lunch_events?select=id,title,price,is_open", {prefer:"return=representation"})
+          ]);
+          if (cfg?.[0]) { PRICE = Number(cfg[0].meal_price || 10); GENERAL_OPEN = cfg[0].lunch_open !== false; }
+          events = loadedEvents || [];
+          DINNER_PRICE = Number(events.find(e => e.id === DINNER_ID)?.price || 6);
         } catch (e) { console.warn("Config", e); }
         document.querySelectorAll(".lunch-price").forEach(x => x.textContent = `${PRICE} € · beguda no inclosa`);
-        reservationForm.style.display = OPEN ? "block" : "none";
-        closed.style.display = OPEN ? "none" : "block";
+        applyAvailability();
         drawPeople();
       }
 
@@ -197,7 +217,7 @@
       }
 
       async function registerMeal() {
-        if (!OPEN) return alert("Les reserves estan tancades.");
+        if (!selectedOpen()) return alert("Les reserves d’aquest àpat estan tancades.");
         const fields = [...document.querySelectorAll(".personName")];
         const names = fields.map(x => x.value.trim());
         const bn = bizumName.value.trim();

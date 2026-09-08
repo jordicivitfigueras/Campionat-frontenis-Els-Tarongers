@@ -51,6 +51,7 @@
   });
   const publicGroups = [
       {label:"Torneig",items:[["/el-meu-torneig","⌕","El meu torneig"],["/directe","●","En directe"],["/horaris","◷","Horaris"],["/quadre","⌘","Quadre"]]},
+      {label:"Comunitat",items:[["/socis","♙","Fes-te soci"]]},
       {label:"Més",items:[["/","⌂","Inici"],["/resultats","▣","Resultats"],["/avisos","◌","Avisos"],["/dinars","🥘","Àpats"],["/historic","♛","Rànquing i històric"],["/informacio","ⓘ","Informació"],["/merchandising","👕","Merchandising"],["/mvp","★","MVP"],["/fotos","▧","Fotos"],["/patrocinadors","♡","Patrocinadors"]]},
     ],
     adminGroups = [

@@ -18,7 +18,11 @@
       .bizum-box { margin-top:14px; background:#fff8e8; border:1px solid #efd596; border-radius:16px; padding:15px; }
       .bizum-box strong { display:block; color:#6f4b00; font-size:18px; }
       .bizum-phone { font-size:24px; font-weight:950; color:#0b5f43; margin-top:4px; }
+      .late-booking-note { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:18px; padding:17px 19px; border:2px solid #e5a83a; border-radius:16px; background:#fff8e8; color:#533900; }
+      .late-booking-note strong { display:block; margin-bottom:3px; font-size:17px; }
+      .late-booking-note a { flex:0 0 auto; }
       @media (max-width:680px) { .meal-cards,.people-grid { grid-template-columns:1fr; } }
+      @media (max-width:680px) { .late-booking-note { align-items:stretch; flex-direction:column; } .late-booking-note a { width:100%; text-align:center; } }
     </style>
   </head>
   <body>
@@ -31,6 +35,10 @@
               <h1 class="section-title">Reserva els àpats</h1>
               <p style="color:#617068">Tria l'àpat que vols reservar, indica quantes persones sereu i escriu un nom per a cadascuna.</p>
             </div>
+          </div>
+          <div class="late-booking-note">
+            <div><strong>Important: parla abans amb Jordi Civit</strong>Abans de fer una reserva nova, contacta amb el Jordi perquè et confirmi que encara hi ha disponibilitat. El formulari continua obert.</div>
+            <a class="btn btn-accent" href="tel:+34634349980">Trucar al Jordi</a>
           </div>
           <div id="closed" class="production-note" style="display:none;margin-bottom:16px">
             <strong>Reserves tancades</strong><br />L’organització ha tancat temporalment les noves reserves d’àpats.

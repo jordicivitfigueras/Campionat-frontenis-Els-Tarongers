@@ -72,7 +72,52 @@
         border-color: #a8cbbb;
         transform: translateY(-1px);
       }
+      .home-command {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr 1fr;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .home-command-card {
+        min-height: 154px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: var(--shadow);
+      }
+      .home-command-card.live {
+        color: #fff;
+        border-color: #0b6b49;
+        background: linear-gradient(135deg, #043a28, #08724e);
+      }
+      .home-command-card .command-label {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 950;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+      .home-command-card.live .command-label { color: #ffd08a; }
+      .home-command-card h2 {
+        margin: 8px 0 5px;
+        color: var(--brand);
+        font-size: 23px;
+      }
+      .home-command-card.live h2 { color: #fff; }
+      .home-command-card p {
+        min-height: 36px;
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .home-command-card.live p { color: rgba(255,255,255,.76); }
+      .home-command-card .btn { padding: 9px 12px; font-size: 11px; }
       @media (max-width: 850px) {
+        .home-command {
+          grid-template-columns: 1fr;
+        }
         .start-steps {
           grid-template-columns: 1fr 1fr;
         }
@@ -105,6 +150,26 @@
             src="/logo-frontenis-blanco.png?v=launch"
             alt="Campionat Frontenis Els Tarongers"
           />
+        </section>
+        <section class="home-command" aria-label="Estat actual del torneig">
+          <article class="home-command-card live">
+            <div class="command-label" id="homeLiveLabel">En directe</div>
+            <h2 id="homeLiveTitle">Comprovant el marcador…</h2>
+            <p id="homeLiveMeta">Carregant l’estat actual del torneig.</p>
+            <a class="btn btn-accent" href="/directe">Obrir el marcador</a>
+          </article>
+          <article class="home-command-card">
+            <div class="command-label">Pròxim partit</div>
+            <h2 id="homeNextTitle">Comprovant l’horari…</h2>
+            <p id="homeNextMeta">Carregant el següent partit programat.</p>
+            <a class="btn btn-secondary" href="/horaris">Veure horaris</a>
+          </article>
+          <article class="home-command-card">
+            <div class="command-label">El teu espai</div>
+            <h2 id="homePlayerTitle">El meu torneig</h2>
+            <p id="homePlayerMeta">Consulta el pròxim rival i el teu camí classificatori.</p>
+            <a class="btn btn-secondary" id="homePlayerAction" href="/el-meu-torneig">Obrir el meu torneig</a>
+          </article>
         </section>
         <section class="start-guide">
           <div class="eyebrow">Per començar</div>
@@ -324,9 +389,67 @@
           document.getElementById("noticeCount").textContent = "—";
         }
       }
+      const homeTimeOrder = (value) => {
+        const days = {"Dijous 10": 1, "Divendres 11": 2, "Dissabte 12": 3};
+        const [day, time = "99:99"] = String(value || "").split(" · ");
+        return (days[day] || 9) * 10000 + Number(time.replace(":", ""));
+      };
+      async function loadHomeCompetition() {
+        try {
+          const [matches, pairs, players] = await Promise.all([
+            SupaSync.req("/rest/v1/matches?tournament_id=eq.2026&select=id,stage,status,scheduled_at,team1_id,team2_id,score1,score2,updated_at"),
+            SupaSync.req("/rest/v1/pairs?tournament_id=eq.2026&select=id,player1_id,player2_id"),
+            SupaSync.req("/rest/v1/players?select=id,full_name"),
+          ]);
+          const playerNames = new Map(players.map((player) => [player.id, player.full_name]));
+          const pairNames = new Map(pairs.map((pair) => [
+            pair.id,
+            [playerNames.get(pair.player1_id), playerNames.get(pair.player2_id)].filter(Boolean).join(" / "),
+          ]));
+          const live = matches.find((match) => match.status === "live");
+          const next = matches
+            .filter((match) => match.status === "pending")
+            .sort((a, b) => homeTimeOrder(a.scheduled_at) - homeTimeOrder(b.scheduled_at))[0];
+          const liveLabel = document.getElementById("homeLiveLabel");
+          const liveTitle = document.getElementById("homeLiveTitle");
+          const liveMeta = document.getElementById("homeLiveMeta");
+          if (live) {
+            liveLabel.textContent = "● Partit en joc";
+            liveTitle.textContent = `${pairNames.get(live.team1_id) || "Per definir"} · ${live.score1}–${live.score2} · ${pairNames.get(live.team2_id) || "Per definir"}`;
+            liveMeta.textContent = `Partit ${live.id} · ${live.stage || ""}`;
+          } else {
+            liveLabel.textContent = "En directe";
+            liveTitle.textContent = "Ara mateix no hi ha cap partit en joc";
+            liveMeta.textContent = next
+              ? `El marcador s’activarà quan comenci el partit ${next.id}.`
+              : "El marcador s’activarà quan comenci el pròxim partit.";
+          }
+          document.getElementById("homeNextTitle").textContent = next
+            ? `${next.scheduled_at || "Horari pendent"} · ${next.id}`
+            : "No hi ha cap partit pendent";
+          document.getElementById("homeNextMeta").textContent = next
+            ? `${pairNames.get(next.team1_id) || "Pendent de classificació"} contra ${pairNames.get(next.team2_id) || "Pendent de classificació"}`
+            : "Consulta els resultats i el quadre final.";
+        } catch {
+          document.getElementById("homeLiveTitle").textContent = "Estat temporalment no disponible";
+          document.getElementById("homeLiveMeta").textContent = "Pots obrir el marcador per tornar-ho a provar.";
+          document.getElementById("homeNextTitle").textContent = "Consulta els horaris";
+          document.getElementById("homeNextMeta").textContent = "Tots els partits continuen disponibles a l’agenda.";
+        }
+      }
+      const savedPlayer = localStorage.getItem("frontenis_my_name_2026");
+      if (savedPlayer) {
+        document.getElementById("homePlayerTitle").textContent = savedPlayer;
+        document.getElementById("homePlayerMeta").textContent = "Continua directament al teu pròxim partit i camí classificatori.";
+        document.getElementById("homePlayerAction").textContent = "Continuar com " + savedPlayer.split(" ")[0];
+      }
       loadHomeStats();
-      window.addEventListener("supabase:change", loadHomeStats);
+      loadHomeCompetition();
+      window.addEventListener("supabase:change", () => {
+        loadHomeStats();
+        loadHomeCompetition();
+      });
     </script>
-    <script src="professional-shell.js?v=home-live-20260813"></script>
+    <script src="professional-shell.js?v=ux-general-20260909"></script>
   </body>
 </html>

@@ -19,10 +19,6 @@
   };
   const path = location.pathname.replace(/\.html$/, "") || "/";
   const IDKEY = "frontenis_my_name_2026";
-  if (path === "/" && localStorage.getItem(IDKEY)) {
-    location.replace("/el-meu-torneig");
-    return;
-  }
   window.MyIdentity = {
     get: () => localStorage.getItem(IDKEY) || "",
     set: (n) => {
@@ -58,15 +54,6 @@
   }
   const publicGroups = [
       {
-        label: "Participa",
-        items: [
-          ["/inscripcio", "✓", "Inscripció"],
-          ["/socis", "♡", "Socis"],
-          ["/dinars", "🥘", "Àpats"],
-          ["/merchandising", "👕", "Merchandising"],
-        ],
-      },
-      {
         label: "Torneig",
         items: [
           ["/", "⌂", "Inici"],
@@ -78,16 +65,16 @@
         ],
       },
       {
-        label: "Comunitat",
+        label: "Més opcions",
+        collapsible: true,
         items: [
+          ["/inscripcio", "✓", "Inscripció"],
+          ["/socis", "♡", "Socis"],
+          ["/dinars", "🥘", "Àpats"],
+          ["/merchandising", "👕", "Merchandising"],
           ["/mvp", "★", "MVP"],
           ["/historic", "♛", "Històric"],
           ["/fotos", "▧", "Fotos"],
-        ],
-      },
-      {
-        label: "Més",
-        items: [
           ["/informacio", "ⓘ", "Informació"],
           ["/avisos", "◌", "Avisos"],
           ["/organitzacio", "◆", "Organització"],
@@ -178,16 +165,26 @@
   const menu = groups
     .map(
       (g) =>
-        `<div class="nav-section">${g.label}</div>${g.items.map(([href, , label]) => `<a href="${href}" class="${path === href ? "is-active" : ""}"><span class="nav-icon">${navIcon(href)}</span><span>${label}</span></a>`).join("")}`,
+        g.collapsible
+          ? `<details class="nav-more" ${g.items.some(([href]) => path === href) ? "open" : ""}><summary>${g.label}</summary>${g.items.map(([href, , label]) => `<a href="${href}" class="${path === href ? "is-active" : ""}"><span class="nav-icon">${navIcon(href)}</span><span>${label}</span></a>`).join("")}</details>`
+          : `<div class="nav-section">${g.label}</div>${g.items.map(([href, , label]) => `<a href="${href}" class="${path === href ? "is-active" : ""}"><span class="nav-icon">${navIcon(href)}</span><span>${label}</span></a>`).join("")}`,
     )
     .join("");
   const shell = document.createElement("div");
   shell.className = "app-shell";
-  shell.innerHTML = `<aside class="app-sidebar"><a class="app-logo" href="/"><img src="/logo-frontenis-blanco.png?v=launch"><strong>Campionat Frontenis<br>Els Tarongers <em>Edició 2026</em></strong></a><nav class="app-menu">${!isAdmin ? '<div id="identityBox"></div>' : ""}${menu}<div class="sep"></div>${isAdmin ? `<a href="/"><span class="nav-icon">${navIcon("/")}</span><span>Web pública</span></a>` : `<a href="/admin"><span class="nav-icon">${navIcon("/admin")}</span><span>Organització</span></a>`}</nav></aside><div class="mobile-menu-overlay" id="mobileMenuOverlay"></div><div class="app-main"><header class="app-head"><button class="mobile-back-btn" id="mobileBackBtn" type="button" aria-label="Tornar enrere">‹</button><button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Obrir menú" aria-expanded="false">☰</button><strong>${currentTitle}</strong><span class="app-head-badge">${isAdmin ? "ADMIN" : "Edició 2026"}</span></header><div class="app-content"></div></div>`;
+  const mobilePrimaryNav = !isAdmin
+    ? [["/", "⌂", "Inici"], ["/el-meu-torneig", "⌕", "El meu"], ["/directe", "●", "Directe"], ["/horaris", "◷", "Horaris"], ["/resultats", "▣", "Resultats"]]
+        .map(([href, icon, label]) => `<a href="${href}" class="${path === href ? "active" : ""}"><span>${icon}</span>${label}</a>`)
+        .join("")
+    : "";
+  shell.innerHTML = `<aside class="app-sidebar"><a class="app-logo" href="/"><img src="/logo-frontenis-blanco.png?v=launch"><strong>Campionat Frontenis<br>Els Tarongers <em>Edició 2026</em></strong></a><nav class="app-menu">${!isAdmin ? '<div id="identityBox"></div>' : ""}${menu}<div class="sep"></div>${isAdmin ? `<a href="/"><span class="nav-icon">${navIcon("/")}</span><span>Web pública</span></a>` : `<a href="/admin"><span class="nav-icon">${navIcon("/admin")}</span><span>Organització</span></a>`}</nav></aside><div class="mobile-menu-overlay" id="mobileMenuOverlay"></div><div class="app-main"><header class="app-head"><button class="mobile-back-btn" id="mobileBackBtn" type="button" aria-label="Tornar enrere">‹</button><button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Obrir menú" aria-expanded="false">☰</button><strong>${currentTitle}</strong><span class="app-head-badge">${isAdmin ? "ADMIN" : "Edició 2026"}</span></header><div class="app-content"></div></div>${mobilePrimaryNav ? `<nav class="mobile-bottom-nav" aria-label="Navegació principal">${mobilePrimaryNav}</nav>` : ""}`;
   const old = [...document.body.children];
   document.body.innerHTML = "";
   document.body.appendChild(shell);
   old.forEach((n) => shell.querySelector(".app-content").appendChild(n));
+  const shellStyle = document.createElement("style");
+  shellStyle.textContent = `.nav-more{margin:8px 0}.nav-more summary{margin:5px 12px;padding:9px 10px;border-radius:10px;color:rgba(255,255,255,.72);font-size:10px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;list-style:none}.nav-more summary::-webkit-details-marker{display:none}.nav-more summary:after{content:"＋";float:right;font-size:13px}.nav-more[open] summary:after{content:"−"}.nav-more summary:hover{background:rgba(255,255,255,.08);color:#fff}@media(max-width:760px){.mobile-bottom-nav{display:grid!important;grid-template-columns:repeat(5,1fr)!important}.app-main{padding-bottom:82px!important}}`;
+  document.head.appendChild(shellStyle);
   if (path === "/resultats") {
     let scoreEvolutionId = 0;
     const arrangeResultRows = () => {
@@ -409,6 +406,13 @@
           value = (
             card.querySelector(".value")?.textContent || ""
           ).toLowerCase();
+        if (label === "Dinars / sopar") {
+          const count = Number(card.querySelector(".value")?.textContent || 0);
+          const meta = card.querySelector(".meta");
+          if (meta)
+            meta.textContent =
+              count === 1 ? "reserva registrada" : "reserves registrades";
+        }
         if (label === "Inscripció") {
           const pending =
             value.includes("pendent") || value.includes("no consta");
@@ -611,9 +615,10 @@
           seeded: /^S\d+$/.test(rival),
         }];
       });
-      const card = document.createElement("div");
-      card.className = "possible-path-card";
-      const heading = document.createElement("strong");
+      const isChoice = /^Si quedeu/.test(title);
+      const card = document.createElement(isChoice ? "details" : "div");
+      card.className = `possible-path-card${isChoice ? " path-choice" : ""}`;
+      const heading = document.createElement(isChoice ? "summary" : "strong");
       heading.textContent = title;
       card.append(heading);
       if (/^S\d+$/.test(token)) {
@@ -705,11 +710,11 @@
       card.append(schedule);
       return card;
     };
-    const appendRound = (section, label, cards) => {
+    const appendRound = (section, label, cards, collapsed = false) => {
       if (!cards.length) return;
-      const round = document.createElement("div");
-      round.className = "possible-round";
-      const title = document.createElement("h4");
+      const round = document.createElement(collapsed ? "details" : "div");
+      round.className = `possible-round${collapsed ? " future-round" : ""}`;
+      const title = document.createElement(collapsed ? "summary" : "h4");
       title.textContent = label;
       const grid = document.createElement("div");
       grid.className = "possible-path-grid";
@@ -854,6 +859,14 @@
           }
         }
         section.append(eyebrow, heading);
+        const competitionStatus = document.createElement("div");
+        competitionStatus.className = `competition-status ${decidedPosition ? "decided" : "pending"}`;
+        competitionStatus.textContent = seed <= 8
+          ? `Cap de sèrie #${seed} · Accés directe al Grup ${String.fromCharCode(73 + seed - 1)}`
+          : decidedPosition
+            ? `Classificació definitiva: ${decidedPosition === 1 ? "1rs" : "2ns"} del Grup ${firstGroup}`
+            : `Classificació del Grup ${firstGroup} encara oberta`;
+        section.append(competitionStatus);
         appendRound(section, "1a fase · Els teus partits", firstPhaseCards);
         appendRound(section, "2a fase · Possibles grups", secondPhaseCards);
 
@@ -880,7 +893,7 @@
             );
           });
         });
-        appendRound(section, "Vuitens de final", eighthCards);
+        appendRound(section, "Vuitens de final", eighthCards, true);
 
         const quarterPaths = new Map();
         const quarterCards = [];
@@ -909,7 +922,7 @@
             ),
           );
         });
-        appendRound(section, "Quarts de final", quarterCards);
+        appendRound(section, "Quarts de final", quarterCards, true);
 
         const semifinalPaths = new Map();
         const semifinalCards = [];
@@ -938,7 +951,7 @@
             ),
           );
         });
-        appendRound(section, "Semifinals", semifinalCards);
+        appendRound(section, "Semifinals", semifinalCards, true);
 
         const finalCards = [];
         semifinalPaths.forEach((unused, semifinalId) => {
@@ -964,7 +977,7 @@
             ),
           );
         });
-        appendRound(section, "Final o 3r i 4t lloc", finalCards);
+        appendRound(section, "Final o 3r i 4t lloc", finalCards, true);
         nextMatch.insertAdjacentElement("afterend", section);
         identity.dataset.pathsPlayer = norm(playerName);
       } catch (error) {
@@ -974,7 +987,7 @@
       }
     }
     const style = document.createElement("style");
-    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:9px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.first-phase-card{border-color:#cfe0d7;background:#fff}.first-phase-card.is-live{border-color:#e7a823;background:#fffaf0}.first-phase-card.is-final{background:#edf7f2;border-color:#badac9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card>strong{color:#073e2d;font-size:15px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}.second-phase-seed-note{padding:7px 9px;border-radius:9px;background:#fff1cf;color:#795500!important;font-weight:900}.second-phase-game{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:10px 11px;border:1px solid #dfe8e3;border-radius:11px;background:#fff}.second-phase-game.seed-game{border-color:#e8c878;background:#fffaf0}.second-phase-game b{grid-column:1/-1;color:#183f31;font-size:12px}.second-phase-game .game-rival{grid-column:1;min-width:0}.second-phase-game .classification-origin{grid-column:1;padding:7px 9px;border-radius:9px;background:#e7f5ed;color:#07543a!important;font-size:13px;font-weight:950}.second-phase-game .possible-rival-names{grid-column:1/-1;color:#52665c;font-size:12px}.second-phase-game small{grid-column:2;grid-row:2;white-space:nowrap;align-self:start}.eliminated-path{padding:16px;border:1px solid #edc4bd;border-radius:15px;background:#fff5f3}.eliminated-path h3{color:#8b2e22!important}.eliminated-path p{margin:0;color:#76534e;font-size:13px;line-height:1.5}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}.second-phase-game{grid-template-columns:1fr}.second-phase-game .game-rival,.second-phase-game .classification-origin,.second-phase-game .possible-rival-names,.second-phase-game small{grid-column:1;grid-row:auto}}`;
+    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.competition-status{margin:0 0 12px;padding:10px 12px;border-radius:12px;font-size:12px;font-weight:950}.competition-status.pending{background:#fff8e8;color:#785400;border:1px solid #efd596}.competition-status.decided{background:#e8f6ee;color:#07543a;border:1px solid #bfe0ce}.possible-round{margin-top:14px}.possible-round>h4,.future-round>summary{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.future-round{border:1px solid #dce7e1;border-radius:14px;background:#fff;padding:0 12px}.future-round>summary{cursor:pointer;list-style:none;padding:13px 2px;margin:0}.future-round>summary::-webkit-details-marker,.path-choice>summary::-webkit-details-marker{display:none}.future-round>summary:after,.path-choice>summary:after{content:"＋";float:right}.future-round[open]>summary:after,.path-choice[open]>summary:after{content:"−"}.future-round .possible-path-grid{padding:0 0 12px}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:9px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.path-choice{display:block;padding:0}.path-choice>summary{padding:14px;color:#073e2d;font-size:15px;font-weight:950;cursor:pointer;list-style:none}.path-choice>.second-phase-game{margin:0 12px 10px}.first-phase-card{border-color:#cfe0d7;background:#fff}.first-phase-card.is-live{border-color:#e7a823;background:#fffaf0}.first-phase-card.is-final{background:#edf7f2;border-color:#badac9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card>strong{color:#073e2d;font-size:15px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}.second-phase-seed-note{padding:7px 9px;border-radius:9px;background:#fff1cf;color:#795500!important;font-weight:900}.second-phase-game{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:10px 11px;border:1px solid #dfe8e3;border-radius:11px;background:#fff}.second-phase-game.seed-game{border-color:#e8c878;background:#fffaf0}.second-phase-game b{grid-column:1/-1;color:#183f31;font-size:12px}.second-phase-game .game-rival{grid-column:1;min-width:0}.second-phase-game .classification-origin{grid-column:1;padding:7px 9px;border-radius:9px;background:#e7f5ed;color:#07543a!important;font-size:13px;font-weight:950}.second-phase-game .possible-rival-names{grid-column:1/-1;color:#52665c;font-size:12px}.second-phase-game small{grid-column:2;grid-row:2;white-space:nowrap;align-self:start}.eliminated-path{padding:16px;border:1px solid #edc4bd;border-radius:15px;background:#fff5f3}.eliminated-path h3{color:#8b2e22!important}.eliminated-path p{margin:0;color:#76534e;font-size:13px;line-height:1.5}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}.second-phase-game{grid-template-columns:1fr}.second-phase-game .game-rival,.second-phase-game .classification-origin,.second-phase-game .possible-rival-names,.second-phase-game small{grid-column:1;grid-row:auto}}`;
     document.head.appendChild(style);
     new MutationObserver(() => setTimeout(decoratePossiblePaths, 0)).observe(
       result,
@@ -991,6 +1004,10 @@
         }
       }
       await SupaSync.init();
+      if (path === "/resultats" && typeof window.render === "function") {
+        await SupaSync.loadTournament();
+        window.render();
+      }
       await setupMyTournamentPicker();
       setupWorkflowActions();
       setupPossibleMatchPaths();

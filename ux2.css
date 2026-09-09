@@ -124,3 +124,18 @@ body{font-size:15px}
 .app-content .score-evo-chevron{font-size:20px;line-height:1;transition:transform .18s ease}
 .app-content .score-evo-toggle[aria-expanded="true"] .score-evo-chevron{transform:rotate(180deg)}
 .app-content .score-evo-grid[hidden]{display:none!important}
+
+/* Resultats: nom · punts · punts · nom. */
+.app-content .result-main{grid-template-columns:130px minmax(0,1fr)!important;gap:18px!important}
+.app-content .result-match{display:grid;grid-template-columns:minmax(0,1fr) 56px 56px minmax(0,1fr);align-items:center;gap:10px;min-width:0}
+.app-content .result-team{font-weight:900;line-height:1.25;min-width:0}
+.app-content .result-team-left{text-align:right}
+.app-content .result-team-right{text-align:left}
+.app-content .result-point{display:grid;place-items:center;min-height:48px;border-radius:12px;background:#edf5f1;color:#0b5f43;font-size:28px;font-weight:950;font-variant-numeric:tabular-nums}
+.app-content .result-point.pending{background:#f5f7f6;color:#8a9690}
+@media(max-width:680px){
+  .app-content .result-main{grid-template-columns:1fr!important;gap:9px!important}
+  .app-content .result-match{grid-template-columns:minmax(0,1fr) 43px 43px minmax(0,1fr);gap:6px}
+  .app-content .result-team{font-size:13px}
+  .app-content .result-point{min-height:40px;font-size:22px}
+}

@@ -190,6 +190,36 @@
   old.forEach((n) => shell.querySelector(".app-content").appendChild(n));
   if (path === "/resultats") {
     let scoreEvolutionId = 0;
+    const arrangeResultRows = () => {
+      document.querySelectorAll(".result-main").forEach((row) => {
+        if (row.dataset.versusLayout === "true") return;
+        const teams = row.querySelector(".result-teams");
+        const score = row.querySelector(".result-score");
+        if (!teams || !score) return;
+        const names = teams.innerText
+          .split(/\n+/)
+          .map((name) => name.trim())
+          .filter(Boolean);
+        const values = score.textContent.trim().match(/^(\d+)\s*[–-]\s*(\d+)$/);
+        const cells = [
+          ["result-team result-team-left", names[0] || "Per definir"],
+          ["result-point", values ? values[1] : "–"],
+          ["result-point", values ? values[2] : "–"],
+          ["result-team result-team-right", names[1] || "Per definir"],
+        ];
+        teams.className = "result-match";
+        teams.replaceChildren(
+          ...cells.map(([className, value]) => {
+            const cell = document.createElement("div");
+            cell.className = className + (values ? "" : " pending");
+            cell.textContent = value;
+            return cell;
+          }),
+        );
+        score.remove();
+        row.dataset.versusLayout = "true";
+      });
+    };
     const makeScoreEvolutionCollapsible = () => {
       document.querySelectorAll(".score-evo").forEach((panel) => {
         if (panel.dataset.collapsible === "true" || panel.querySelector(".no-evo"))
@@ -215,8 +245,12 @@
         panel.dataset.collapsible = "true";
       });
     };
-    makeScoreEvolutionCollapsible();
-    new MutationObserver(makeScoreEvolutionCollapsible).observe(
+    const enhanceResults = () => {
+      arrangeResultRows();
+      makeScoreEvolutionCollapsible();
+    };
+    enhanceResults();
+    new MutationObserver(enhanceResults).observe(
       shell.querySelector(".app-content"),
       { childList: true, subtree: true },
     );

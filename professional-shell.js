@@ -41,7 +41,7 @@
       );
     },
   };
-  ["brand-logo.css", "ux2.css", "mobile-nav.css", "ux-overhaul.css"].forEach((f) => {
+  ["brand-logo.css", "ux2.css", "mobile-nav.css"].forEach((f) => {
     if (!document.querySelector(`link[href*="${f}"]`)) {
       const l = document.createElement("link");
       l.rel = "stylesheet";
@@ -49,10 +49,52 @@
       document.head.appendChild(l);
     }
   });
+  // The live scoreboard is a dedicated, full-viewport experience. It keeps
+  // the public navigation out of the way so the score remains readable on a
+  // television, projector or mobile screen.
+  if (path === "/directe") {
+    document.documentElement.classList.add("live-page");
+    return;
+  }
   const publicGroups = [
-      {label:"Torneig",items:[["/el-meu-torneig","⌕","El meu torneig"],["/directe","●","En directe"],["/horaris","◷","Horaris"],["/quadre","⌘","Quadre"]]},
-      {label:"Comunitat",items:[["/socis","♙","Fes-te soci"]]},
-      {label:"Més",items:[["/","⌂","Inici"],["/resultats","▣","Resultats"],["/avisos","◌","Avisos"],["/dinars","🥘","Àpats"],["/historic","♛","Rànquing i històric"],["/informacio","ⓘ","Informació"],["/merchandising","👕","Merchandising"],["/mvp","★","MVP"],["/fotos","▧","Fotos"],["/patrocinadors","♡","Patrocinadors"]]},
+      {
+        label: "Participa",
+        items: [
+          ["/inscripcio", "✓", "Inscripció"],
+          ["/socis", "♡", "Socis"],
+          ["/dinars", "🥘", "Àpats"],
+          ["/merchandising", "👕", "Merchandising"],
+        ],
+      },
+      {
+        label: "Torneig",
+        items: [
+          ["/", "⌂", "Inici"],
+          ["/el-meu-torneig", "⌕", "El meu torneig"],
+          ["/directe", "●", "En directe"],
+          ["/horaris", "◷", "Horaris"],
+          ["/resultats", "▣", "Resultats"],
+          ["/quadre", "⌘", "Quadre"],
+        ],
+      },
+      {
+        label: "Comunitat",
+        items: [
+          ["/mvp", "★", "MVP"],
+          ["/historic", "♛", "Històric"],
+          ["/fotos", "▧", "Fotos"],
+        ],
+      },
+      {
+        label: "Més",
+        items: [
+          ["/informacio", "ⓘ", "Informació"],
+          ["/avisos", "◌", "Avisos"],
+          ["/organitzacio", "◆", "Organització"],
+          ["/patrocinadors", "♡", "Patrocinadors"],
+          ["/agora", "☕", "Àgora"],
+        ],
+      },
     ],
     adminGroups = [
       {
@@ -355,16 +397,6 @@
       await SupaSync.init();
       await setupMyTournamentPicker();
       setupWorkflowActions();
-      if (path === "/el-meu-torneig") {
-        let profileRefreshTimer;
-        window.addEventListener("supabase:change", () => {
-          clearTimeout(profileRefreshTimer);
-          profileRefreshTimer = setTimeout(() => {
-            const saved = MyIdentity.get();
-            if (saved && typeof window.run === "function") window.run(saved);
-          }, 180);
-        });
-      }
       await loadScript("/name-picker.js?v=identity4").catch(() => {});
       const identityFields = new Set([
         "p1",
@@ -432,19 +464,3 @@
     })
     .catch(() => {});
 })();
-
-if (location.pathname.replace(/\.html$/, "") === "/el-meu-torneig") {
-  const possibleMatches = document.createElement("script");
-  possibleMatches.src = "/el-meu-torneig-possibles.js?v=ux-final-1";
-  document.head.appendChild(possibleMatches);
-}
-if (location.pathname.replace(/\.html$/, "") === "/quadre") {
-  const dynamicDraw = document.createElement("script");
-  dynamicDraw.src = "/quadre-dynamic.js?v=ux-final-1";
-  document.head.appendChild(dynamicDraw);
-}
-if ((location.pathname.replace(/\.html$/, "") || "/") === "/") {
-  const homePersonal = document.createElement("script");
-  homePersonal.src = "/home-personal.js?v=ux-final-1";
-  document.head.appendChild(homePersonal);
-}

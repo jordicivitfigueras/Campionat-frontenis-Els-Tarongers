@@ -4,8 +4,24 @@
   function navigation(){
     const titles=[...document.querySelectorAll('.phase-title')];
     const first=titles.find(x=>x.textContent.includes('1a fase')),second=titles.find(x=>x.textContent.includes('2a fase')),knock=titles.find(x=>x.textContent.includes('Quadre eliminatori')),ranking=document.querySelector('.ranking-box');
-    if(first)first.id='primera-fase';if(second)second.id='segona-fase';if(knock)knock.id='eliminatories';if(ranking)ranking.id='ranking';
-    if(ranking&&!document.querySelector('.draw-nav'))ranking.insertAdjacentHTML('beforebegin','<nav class="draw-nav" aria-label="Seccions del quadre"><a href="#eliminatories">Eliminatòries</a><a href="#primera-fase">Primera fase</a><a href="#segona-fase">Segona fase</a><a href="#ranking">Rànquing</a></nav>');
+    const format=document.querySelector('.format-guide'),rule=document.querySelector('.rule'),root=first?.parentElement;
+    if(!root||!first||!second||!knock||!ranking||document.querySelector('.draw-tabs'))return;
+    const wrapRange=(start,end,id)=>{
+      const panel=document.createElement('section');panel.className='draw-panel';panel.id=id;root.insertBefore(panel,start);
+      let node=start;while(node&&node!==end){const next=node.nextElementSibling;panel.appendChild(node);node=next}return panel
+    };
+    const firstPanel=wrapRange(first,second,'primera-fase');
+    const secondPanel=wrapRange(second,knock,'segona-fase');
+    const knockoutPanel=wrapRange(knock,null,'eliminatories');
+    const infoPanel=document.createElement('section');infoPanel.className='draw-panel';infoPanel.id='format-ranking';root.insertBefore(infoPanel,firstPanel);
+    if(format)infoPanel.appendChild(format);if(ranking)infoPanel.appendChild(ranking);if(rule)infoPanel.appendChild(rule);
+    const nav=document.createElement('nav');nav.className='draw-tabs';nav.setAttribute('aria-label','Seccions del quadre');
+    nav.innerHTML='<button data-panel="eliminatories">Eliminatòries</button><button data-panel="primera-fase">Primera fase</button><button data-panel="segona-fase">Segona fase</button><button data-panel="format-ranking">Format i rànquing</button>';
+    root.insertBefore(nav,infoPanel);
+    const panels=[knockoutPanel,firstPanel,secondPanel,infoPanel];
+    const activate=id=>{panels.forEach(panel=>panel.hidden=panel.id!==id);nav.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button.dataset.panel===id));history.replaceState(null,'','#'+id)};
+    nav.querySelectorAll('button').forEach(button=>button.onclick=()=>activate(button.dataset.panel));
+    const requested=location.hash.slice(1);activate(panels.some(panel=>panel.id===requested)?requested:'eliminatories');
   }
   let loading=false;
   async function load(){
@@ -53,6 +69,6 @@
       if(mine)document.querySelectorAll('.group .pair').forEach(x=>{if(norm(x.textContent).includes(mine))x.classList.add('ux-highlight')});
     }catch(e){}finally{loading=false}
   }
-  const style=document.createElement('style');style.textContent='.pair.is-qualified{color:#123f30}.qualified-source{display:inline-block;margin-bottom:3px;color:#8a650f;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.05em}.group-status-tag{display:inline-flex;width:max-content;margin:5px 0 0 7px;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle}.group-status-tag.first{color:#765000;background:#fff0c9}.group-status-tag.second,.group-status-tag.qualified{color:#07603f;background:#e4f5eb}.group-status-tag.eliminated{color:#8b2e22;background:#fde9e6}';document.head.appendChild(style);
+  const style=document.createElement('style');style.textContent='.draw-tabs{position:sticky;top:10px;z-index:20;display:flex;gap:7px;overflow-x:auto;margin:18px 0;padding:7px;border:1px solid #dce7e1;border-radius:16px;background:rgba(255,255,255,.94);box-shadow:0 10px 30px rgba(6,49,34,.1);backdrop-filter:blur(12px)}.draw-tabs button{flex:0 0 auto;border:0;border-radius:11px;background:transparent;padding:10px 13px;color:#52665c;font-weight:900;cursor:pointer}.draw-tabs button.active{background:#0b6b49;color:#fff}.draw-panel[hidden]{display:none}.draw-panel{animation:draw-in .18s ease}@keyframes draw-in{from{opacity:.4;transform:translateY(3px)}}.pair.is-qualified{color:#123f30}.qualified-source{display:inline-block;margin-bottom:3px;color:#8a650f;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.05em}.group-status-tag{display:inline-flex;width:max-content;margin:5px 0 0 7px;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle}.group-status-tag.first{color:#765000;background:#fff0c9}.group-status-tag.second,.group-status-tag.qualified{color:#07603f;background:#e4f5eb}.group-status-tag.eliminated{color:#8b2e22;background:#fde9e6}';document.head.appendChild(style);
   navigation();window.addEventListener('supabase:ready',load);window.addEventListener('supabase:change',load);setTimeout(load,500);
 })();

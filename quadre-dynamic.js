@@ -23,10 +23,11 @@
           const a=row(game.team1_id),b=row(game.team2_id);a.played++;b.played++;a.pf+=Number(game.score1||0);a.pa+=Number(game.score2||0);b.pf+=Number(game.score2||0);b.pa+=Number(game.score1||0);if(Number(game.score1)>Number(game.score2))a.w++;else b.w++;
         });
         const rows=[...stats.values()],complete=games.length===3&&games.every(game=>game.status==='final'&&game.team1_id&&game.team2_id&&Number(game.score1)!==Number(game.score2));
-        if(complete){const ranking=rows.sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa)||b.pf-a.pf||(names.get(a.id)||'').localeCompare(names.get(b.id)||'','ca'));return{ranking,eliminated:ranking[2]?.id||null,qualified:new Set(ranking.slice(0,2).map(item=>item.id))}}
+        if(complete){const ranking=rows.sort((a,b)=>b.w-a.w||(b.pf-b.pa)-(a.pf-a.pa)||b.pf-a.pf||(names.get(a.id)||'').localeCompare(names.get(b.id)||'','ca')),positions=new Map(ranking.map((item,index)=>[item.id,index+1]));return{ranking,positions,eliminated:ranking[2]?.id||null,qualified:new Set(ranking.slice(0,2).map(item=>item.id))}}
         const securedFirst=rows.find(item=>item.played===2&&item.w===2);
         const eliminated=rows.find(item=>item.played===2&&item.w===0)?.id||null;
-        return{ranking:securedFirst?[securedFirst]:[],eliminated,qualified:new Set(eliminated?rows.filter(item=>item.id!==eliminated).map(item=>item.id):securedFirst?[securedFirst.id]:[])};
+        const positions=new Map();if(securedFirst)positions.set(securedFirst.id,1);if(eliminated)positions.set(eliminated,3);
+        return{ranking:securedFirst?[securedFirst]:[],positions,eliminated,qualified:new Set(eliminated?rows.filter(item=>item.id!==eliminated).map(item=>item.id):securedFirst?[securedFirst.id]:[])};
       };
       document.querySelectorAll('.group .pair').forEach(slot=>{
         if(!slot.dataset.source){const found=slot.textContent.trim().match(/^([12])[rn]\s+Grup\s+([A-H])$/i);if(found)slot.dataset.source=found[1]+found[2].toUpperCase()}
@@ -41,7 +42,10 @@
         groupCard.querySelectorAll('.pair').forEach(slot=>{
           slot.querySelectorAll('.group-status-tag').forEach(tag=>tag.remove());
           const pairEntry=[...names.entries()].find(([,name])=>norm(slot.textContent).includes(norm(name)));if(!pairEntry)return;
-          const [pairId]=pairEntry;if(pairId===state.eliminated)slot.insertAdjacentHTML('beforeend','<span class="group-status-tag eliminated">Eliminats</span>');
+          const [pairId]=pairEntry,position=state.positions.get(pairId);
+          if(position===1)slot.insertAdjacentHTML('beforeend','<span class="group-status-tag first">1rs de grup</span>');
+          else if(position===2)slot.insertAdjacentHTML('beforeend','<span class="group-status-tag second">2ns de grup</span>');
+          else if(position===3)slot.insertAdjacentHTML('beforeend','<span class="group-status-tag eliminated">Eliminats</span>');
           else if(state.qualified.has(pairId))slot.insertAdjacentHTML('beforeend','<span class="group-status-tag qualified">Classificats</span>');
         });
       });
@@ -49,6 +53,6 @@
       if(mine)document.querySelectorAll('.group .pair').forEach(x=>{if(norm(x.textContent).includes(mine))x.classList.add('ux-highlight')});
     }catch(e){}finally{loading=false}
   }
-  const style=document.createElement('style');style.textContent='.pair.is-qualified{color:#123f30}.qualified-source{display:inline-block;margin-bottom:3px;color:#8a650f;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.05em}.group-status-tag{display:block;width:max-content;margin-top:5px;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em}.group-status-tag.qualified{color:#07603f;background:#e4f5eb}.group-status-tag.eliminated{color:#8b2e22;background:#fde9e6}';document.head.appendChild(style);
+  const style=document.createElement('style');style.textContent='.pair.is-qualified{color:#123f30}.qualified-source{display:inline-block;margin-bottom:3px;color:#8a650f;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.05em}.group-status-tag{display:inline-flex;width:max-content;margin:5px 0 0 7px;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle}.group-status-tag.first{color:#765000;background:#fff0c9}.group-status-tag.second,.group-status-tag.qualified{color:#07603f;background:#e4f5eb}.group-status-tag.eliminated{color:#8b2e22;background:#fde9e6}';document.head.appendChild(style);
   navigation();window.addEventListener('supabase:ready',load);window.addEventListener('supabase:change',load);setTimeout(load,500);setInterval(load,5000);
 })();

@@ -467,6 +467,23 @@
       O: [["S7", "1G"], ["1G", "2H"], ["S7", "2H"]],
       P: [["S8", "1H"], ["1H", "2A"], ["S8", "2A"]],
     };
+    const eighthSources = {
+      V1: ["1I", "2M"],
+      V2: ["1J", "2N"],
+      V3: ["1K", "2O"],
+      V4: ["1L", "2P"],
+      V5: ["1M", "2I"],
+      V6: ["1N", "2J"],
+      V7: ["1O", "2K"],
+      V8: ["1P", "2L"],
+    };
+    const quarterSources = {
+      Q1: ["V1", "V8"],
+      Q2: ["V4", "V5"],
+      Q3: ["V3", "V6"],
+      Q4: ["V2", "V7"],
+    };
+    const semifinalSources = { S1: ["Q1", "Q2"], S2: ["Q3", "Q4"] };
     const norm = (value) =>
       String(value || "")
         .toLowerCase()
@@ -476,7 +493,7 @@
     const sourceLabel = (source) => {
       const seeded = /^S(\d+)$/.exec(source);
       if (seeded) return `Cap de sèrie #${seeded[1]}`;
-      const ranked = /^([12])([A-H])$/.exec(source);
+      const ranked = /^([12])([A-P])$/.exec(source);
       if (ranked)
         return `${ranked[1] === "1" ? "1r" : "2n"} del grup ${ranked[2]}`;
       return source;
@@ -530,6 +547,33 @@
       card.append(heading, opponents, schedule);
       return card;
     };
+    const findRoute = (sources, token) =>
+      Object.entries(sources).find(([, entrants]) => entrants.includes(token));
+    const makeRouteCard = (title, detail, matchId, matches) => {
+      const card = document.createElement("div");
+      card.className = "possible-path-card possible-route-card";
+      const heading = document.createElement("strong");
+      heading.textContent = title;
+      const route = document.createElement("span");
+      route.textContent = detail;
+      const schedule = document.createElement("small");
+      const match = matches.find((item) => item.id === matchId);
+      schedule.textContent = `${matchId} · ${timeLabel(match?.scheduled_at)}`;
+      card.append(heading, route, schedule);
+      return card;
+    };
+    const appendRound = (section, label, cards) => {
+      if (!cards.length) return;
+      const round = document.createElement("div");
+      round.className = "possible-round";
+      const title = document.createElement("h4");
+      title.textContent = label;
+      const grid = document.createElement("div");
+      grid.className = "possible-path-grid";
+      cards.forEach((card) => grid.append(card));
+      round.append(title, grid);
+      section.append(round);
+    };
     async function decoratePossiblePaths() {
       const identity = result.querySelector(".identity");
       const playerName = identity?.querySelector(".identity-top h2")?.textContent?.trim();
@@ -557,12 +601,14 @@
         eyebrow.textContent = "Camí de competició";
         const heading = document.createElement("h3");
         heading.textContent = "Següents partits possibles";
-        const grid = document.createElement("div");
-        grid.className = "possible-path-grid";
-        if (Number(pair.seed) <= 8) {
-          const group = String.fromCharCode(73 + Number(pair.seed) - 1);
-          grid.append(
-            makeCard(`Cap de sèrie · Grup ${group}`, `S${pair.seed}`, group, data.matches),
+        const groupRoutes = [];
+        const secondPhaseCards = [];
+        const seed = Number(pair.seed);
+        if (seed >= 1 && seed <= 8) {
+          const group = String.fromCharCode(73 + seed - 1);
+          groupRoutes.push({ group, token: `S${seed}` });
+          secondPhaseCards.push(
+            makeCard(`Cap de sèrie · Grup ${group}`, `S${seed}`, group, data.matches),
           );
         } else {
           const firstMatch = data.matches.find(
@@ -574,7 +620,11 @@
           if (!group) return;
           const firstTarget = branchFor(group, 1);
           const secondTarget = branchFor(group, 2);
-          grid.append(
+          groupRoutes.push(
+            { group: firstTarget, token: `1${group}` },
+            { group: secondTarget, token: `2${group}` },
+          );
+          secondPhaseCards.push(
             makeCard(
               `Si quedeu 1rs · Grup ${firstTarget}`,
               `1${group}`,
@@ -589,7 +639,102 @@
             ),
           );
         }
-        section.append(eyebrow, heading, grid);
+        section.append(eyebrow, heading);
+        appendRound(section, "2a fase", secondPhaseCards);
+
+        const eighthCards = [];
+        const eighthIds = new Set();
+        groupRoutes.forEach(({ group }) => {
+          [1, 2].forEach((position) => {
+            const token = `${position}${group}`;
+            const entry = findRoute(eighthSources, token);
+            if (!entry) return;
+            const [matchId, entrants] = entry;
+            eighthIds.add(matchId);
+            const rival = entrants.find((source) => source !== token);
+            eighthCards.push(
+              makeRouteCard(
+                `Si quedeu ${position === 1 ? "1rs" : "2ns"} del grup ${group}`,
+                `Vuitens contra ${sourceLabel(rival)}`,
+                matchId,
+                data.matches,
+              ),
+            );
+          });
+        });
+        appendRound(section, "Vuitens de final", eighthCards);
+
+        const quarterPaths = new Map();
+        const quarterCards = [];
+        eighthIds.forEach((eighthId) => {
+          const entry = findRoute(quarterSources, eighthId);
+          if (!entry) return;
+          const [matchId] = entry;
+          if (!quarterPaths.has(matchId)) quarterPaths.set(matchId, []);
+          quarterPaths.get(matchId).push(eighthId);
+        });
+        quarterPaths.forEach((possibleEighths, matchId) => {
+          const entrants = quarterSources[matchId];
+          const rival = entrants.find((source) => !possibleEighths.includes(source));
+          const origins = possibleEighths.join(" o ");
+          quarterCards.push(
+            makeRouteCard(
+              `Si guanyeu ${origins}`,
+              rival
+                ? `Quarts contra el guanyador de ${rival}`
+                : "Els dos camins possibles coincideixen en aquests quarts",
+              matchId,
+              data.matches,
+            ),
+          );
+        });
+        appendRound(section, "Quarts de final", quarterCards);
+
+        const semifinalPaths = new Map();
+        const semifinalCards = [];
+        quarterPaths.forEach((unused, quarterId) => {
+          const entry = findRoute(semifinalSources, quarterId);
+          if (!entry) return;
+          const [matchId] = entry;
+          if (!semifinalPaths.has(matchId)) semifinalPaths.set(matchId, []);
+          semifinalPaths.get(matchId).push(quarterId);
+        });
+        semifinalPaths.forEach((possibleQuarters, matchId) => {
+          const entrants = semifinalSources[matchId];
+          const rival = entrants.find((source) => !possibleQuarters.includes(source));
+          const origins = possibleQuarters.join(" o ");
+          semifinalCards.push(
+            makeRouteCard(
+              `Si guanyeu ${origins}`,
+              rival
+                ? `Semifinal contra el guanyador de ${rival}`
+                : "Els dos camins possibles coincideixen en aquesta semifinal",
+              matchId,
+              data.matches,
+            ),
+          );
+        });
+        appendRound(section, "Semifinals", semifinalCards);
+
+        const finalCards = [];
+        semifinalPaths.forEach((unused, semifinalId) => {
+          const rival = semifinalId === "S1" ? "S2" : "S1";
+          finalCards.push(
+            makeRouteCard(
+              `Si guanyeu ${semifinalId}`,
+              `Final contra el guanyador de ${rival}`,
+              "FINAL",
+              data.matches,
+            ),
+            makeRouteCard(
+              `Si perdeu ${semifinalId}`,
+              `3r i 4t lloc contra el perdedor de ${rival}`,
+              "3/4",
+              data.matches,
+            ),
+          );
+        });
+        appendRound(section, "Final o 3r i 4t lloc", finalCards);
         nextMatch.insertAdjacentElement("afterend", section);
         identity.dataset.pathsPlayer = norm(playerName);
       } catch (error) {
@@ -599,7 +744,7 @@
       }
     }
     const style = document.createElement("style");
-    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 11px!important}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-path-card strong{color:#073e2d;font-size:14px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}}`;
+    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card strong{color:#073e2d;font-size:14px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}}`;
     document.head.appendChild(style);
     new MutationObserver(() => setTimeout(decoratePossiblePaths, 0)).observe(
       result,

@@ -512,7 +512,7 @@
           "/rest/v1/pairs?tournament_id=eq.2026&select=id,seed,player1_id,player2_id",
         ),
         SupaSync.req(
-          "/rest/v1/matches?tournament_id=eq.2026&select=id,scheduled_at,team1_id,team2_id,team1_source,team2_source,status",
+          "/rest/v1/matches?tournament_id=eq.2026&select=id,scheduled_at,team1_id,team2_id,team1_source,team2_source,status,score1,score2",
         ),
       ]).then(([players, pairs, matches]) => ({ players, pairs, matches })));
     const branchFor = (group, position) => {
@@ -625,35 +625,14 @@
     };
     const findRoute = (sources, token) =>
       Object.entries(sources).find(([, entrants]) => entrants.includes(token));
-    const makeRouteCard = (
-      title,
-      detail,
-      matchId,
-      data,
-      currentPairId,
-      rivalSources,
-      sourceType,
-    ) => {
+    const makeRouteCard = (title, detail, matchId, data) => {
       const card = document.createElement("div");
       card.className = "possible-path-card possible-route-card";
       const heading = document.createElement("strong");
       heading.textContent = title;
       const route = document.createElement("span");
       route.textContent = detail;
-      const names = possibleRivalNames(
-        rivalSources,
-        sourceType,
-        data,
-        currentPairId,
-      );
-      if (names.length) {
-        const rivals = document.createElement("span");
-        rivals.className = "possible-rival-names";
-        rivals.textContent = `Possibles rivals: ${names.join(" · ")}`;
-        card.append(heading, route, rivals);
-      } else {
-        card.append(heading, route);
-      }
+      card.append(heading, route);
       const schedule = document.createElement("small");
       const match = data.matches.find((item) => item.id === matchId);
       schedule.textContent = `${matchId} · ${timeLabel(match?.scheduled_at)}`;
@@ -692,6 +671,76 @@
             )
           : null;
         if (!pair) return;
+        const firstGroupMatches = data.matches.filter(
+          (match) =>
+            /^[A-H][1-3]$/.test(match.id) &&
+            (match.team1_id === pair.id || match.team2_id === pair.id),
+        );
+        const losses = firstGroupMatches.filter((match) => {
+          if (match.status !== "final") return false;
+          const ownScore =
+            match.team1_id === pair.id ? Number(match.score1) : Number(match.score2);
+          const rivalScore =
+            match.team1_id === pair.id ? Number(match.score2) : Number(match.score1);
+          return ownScore < rivalScore;
+        }).length;
+        const wins = firstGroupMatches.filter((match) => {
+          if (match.status !== "final") return false;
+          const ownScore =
+            match.team1_id === pair.id ? Number(match.score1) : Number(match.score2);
+          const rivalScore =
+            match.team1_id === pair.id ? Number(match.score2) : Number(match.score1);
+          return ownScore > rivalScore;
+        }).length;
+        const firstGroup = firstGroupMatches[0]?.id?.[0];
+        const allGroupMatches = firstGroup
+          ? data.matches.filter((match) => new RegExp(`^${firstGroup}[1-3]$`).test(match.id))
+          : [];
+        let finalGroupPosition = null;
+        if (
+          allGroupMatches.length === 3 &&
+          allGroupMatches.every(
+            (match) =>
+              match.status === "final" &&
+              match.team1_id &&
+              match.team2_id &&
+              Number(match.score1) !== Number(match.score2),
+          )
+        ) {
+          const standings = new Map();
+          const row = (id) => {
+            if (!standings.has(id)) standings.set(id, { id, wins: 0, pf: 0, pa: 0 });
+            return standings.get(id);
+          };
+          allGroupMatches.forEach((match) => {
+            const a = row(match.team1_id), b = row(match.team2_id);
+            a.pf += Number(match.score1); a.pa += Number(match.score2);
+            b.pf += Number(match.score2); b.pa += Number(match.score1);
+            if (Number(match.score1) > Number(match.score2)) a.wins += 1;
+            else b.wins += 1;
+          });
+          finalGroupPosition =
+            [...standings.values()]
+              .sort(
+                (a, b) =>
+                  b.wins - a.wins ||
+                  b.pf - b.pa - (a.pf - a.pa) ||
+                  b.pf - a.pf,
+              )
+              .findIndex((item) => item.id === pair.id) + 1;
+        }
+        const decidedPosition = wins >= 2 ? 1 : finalGroupPosition;
+        if (losses >= 2 || decidedPosition === 3) {
+          const section = document.createElement("section");
+          section.className = "possible-paths eliminated-path";
+          section.innerHTML =
+            '<div class="eyebrow">Estat de competició</div><h3>Parella eliminada</h3><p>Amb dues derrotes, la parella queda automàticament fora de les dues primeres posicions del grup.</p>';
+          nextMatch.innerHTML =
+            '<div class="stage">Fase de grups finalitzada</div><div class="when">Parella eliminada</div><div class="meta">Gràcies per participar en el Campionat 2026.</div>';
+          nextMatch.insertAdjacentElement("afterend", section);
+          identity.dataset.pathsPlayer = norm(playerName);
+          return;
+        }
         const section = document.createElement("section");
         section.className = "possible-paths";
         const eyebrow = document.createElement("div");
@@ -709,35 +758,30 @@
             makeCard(`Cap de sèrie · Grup ${group}`, `S${seed}`, group, data, pair.id),
           );
         } else {
-          const firstMatch = data.matches.find(
-            (match) =>
-              /^[A-H][1-3]$/.test(match.id) &&
-              (match.team1_id === pair.id || match.team2_id === pair.id),
-          );
-          const group = firstMatch?.id?.[0];
+          const group = firstGroup;
           if (!group) return;
           const firstTarget = branchFor(group, 1);
           const secondTarget = branchFor(group, 2);
-          groupRoutes.push(
-            { group: firstTarget, token: `1${group}` },
-            { group: secondTarget, token: `2${group}` },
-          );
-          secondPhaseCards.push(
-            makeCard(
-              `Si quedeu 1rs · Grup ${firstTarget}`,
-              `1${group}`,
-              firstTarget,
-              data,
-              pair.id,
-            ),
-            makeCard(
-              `Si quedeu 2ns · Grup ${secondTarget}`,
-              `2${group}`,
-              secondTarget,
-              data,
-              pair.id,
-            ),
-          );
+          if (decidedPosition === 1) {
+            groupRoutes.push({ group: firstTarget, token: `1${group}` });
+            secondPhaseCards.push(
+              makeCard(`1rs del Grup ${group} · Grup ${firstTarget}`, `1${group}`, firstTarget, data, pair.id),
+            );
+          } else if (decidedPosition === 2) {
+            groupRoutes.push({ group: secondTarget, token: `2${group}` });
+            secondPhaseCards.push(
+              makeCard(`2ns del Grup ${group} · Grup ${secondTarget}`, `2${group}`, secondTarget, data, pair.id),
+            );
+          } else {
+            groupRoutes.push(
+              { group: firstTarget, token: `1${group}` },
+              { group: secondTarget, token: `2${group}` },
+            );
+            secondPhaseCards.push(
+              makeCard(`Si quedeu 1rs · Grup ${firstTarget}`, `1${group}`, firstTarget, data, pair.id),
+              makeCard(`Si quedeu 2ns · Grup ${secondTarget}`, `2${group}`, secondTarget, data, pair.id),
+            );
+          }
         }
         section.append(eyebrow, heading);
         appendRound(section, "2a fase", secondPhaseCards);
@@ -859,7 +903,7 @@
       }
     }
     const style = document.createElement("style");
-    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card strong{color:#073e2d;font-size:14px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card .possible-rival-names{color:#173f31;font-size:12px;font-weight:750}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}}`;
+    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card strong{color:#073e2d;font-size:14px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}.eliminated-path{padding:16px;border:1px solid #edc4bd;border-radius:15px;background:#fff5f3}.eliminated-path h3{color:#8b2e22!important}.eliminated-path p{margin:0;color:#76534e;font-size:13px;line-height:1.5}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}}`;
     document.head.appendChild(style);
     new MutationObserver(() => setTimeout(decoratePossiblePaths, 0)).observe(
       result,

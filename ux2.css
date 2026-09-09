@@ -117,3 +117,10 @@ body{font-size:15px}
 
 /* Resultats: acostar la primera puntuació al separador central. */
 .app-content .score-evo-grid > :nth-child(2n + 1){text-align:right}
+
+.app-content .score-evo-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:transparent;color:#52635b;padding:2px 0 7px;font:inherit;font-size:12px;font-weight:950;letter-spacing:.06em;text-align:left;text-transform:uppercase;cursor:pointer}
+.app-content .score-evo-toggle:hover{color:#0b5f43}
+.app-content .score-evo-toggle:focus-visible{outline:3px solid rgba(11,95,67,.22);outline-offset:4px;border-radius:6px}
+.app-content .score-evo-chevron{font-size:20px;line-height:1;transition:transform .18s ease}
+.app-content .score-evo-toggle[aria-expanded="true"] .score-evo-chevron{transform:rotate(180deg)}
+.app-content .score-evo-grid[hidden]{display:none!important}

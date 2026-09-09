@@ -54,5 +54,5 @@
     }catch(e){}finally{loading=false}
   }
   const style=document.createElement('style');style.textContent='.pair.is-qualified{color:#123f30}.qualified-source{display:inline-block;margin-bottom:3px;color:#8a650f;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.05em}.group-status-tag{display:inline-flex;width:max-content;margin:5px 0 0 7px;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle}.group-status-tag.first{color:#765000;background:#fff0c9}.group-status-tag.second,.group-status-tag.qualified{color:#07603f;background:#e4f5eb}.group-status-tag.eliminated{color:#8b2e22;background:#fde9e6}';document.head.appendChild(style);
-  navigation();window.addEventListener('supabase:ready',load);window.addEventListener('supabase:change',load);setTimeout(load,500);setInterval(load,5000);
+  navigation();window.addEventListener('supabase:ready',load);window.addEventListener('supabase:change',load);setTimeout(load,500);
 })();

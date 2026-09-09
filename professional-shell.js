@@ -188,6 +188,39 @@
   document.body.innerHTML = "";
   document.body.appendChild(shell);
   old.forEach((n) => shell.querySelector(".app-content").appendChild(n));
+  if (path === "/resultats") {
+    let scoreEvolutionId = 0;
+    const makeScoreEvolutionCollapsible = () => {
+      document.querySelectorAll(".score-evo").forEach((panel) => {
+        if (panel.dataset.collapsible === "true" || panel.querySelector(".no-evo"))
+          return;
+        const title = panel.querySelector(".score-evo-title");
+        const grid = panel.querySelector(".score-evo-grid");
+        if (!title || !grid) return;
+        const button = document.createElement("button");
+        const gridId = `score-evolution-${++scoreEvolutionId}`;
+        grid.id = gridId;
+        grid.hidden = true;
+        button.type = "button";
+        button.className = "score-evo-toggle";
+        button.setAttribute("aria-expanded", "false");
+        button.setAttribute("aria-controls", gridId);
+        button.innerHTML = `<span>${title.textContent}</span><span class="score-evo-chevron" aria-hidden="true">⌄</span>`;
+        button.addEventListener("click", () => {
+          const open = button.getAttribute("aria-expanded") !== "true";
+          button.setAttribute("aria-expanded", String(open));
+          grid.hidden = !open;
+        });
+        title.replaceWith(button);
+        panel.dataset.collapsible = "true";
+      });
+    };
+    makeScoreEvolutionCollapsible();
+    new MutationObserver(makeScoreEvolutionCollapsible).observe(
+      shell.querySelector(".app-content"),
+      { childList: true, subtree: true },
+    );
+  }
   function decorateMerchandisingLinks() {
     document.querySelectorAll('a[href="/merchandising"]').forEach((link) => {
       if (link.querySelector(".merch-deadline")) return;

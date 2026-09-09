@@ -21,6 +21,15 @@
       .late-booking-note { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:18px; padding:17px 19px; border:2px solid #e5a83a; border-radius:16px; background:#fff8e8; color:#533900; }
       .late-booking-note strong { display:block; margin-bottom:3px; font-size:17px; }
       .late-booking-note a { flex:0 0 auto; }
+      .meals-flow { display:grid; gap:16px; margin-top:16px; }
+      .public-list-details { padding:0; overflow:hidden; }
+      .public-list-details > summary { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:17px 19px; color:#0b5f43; font-size:17px; font-weight:950; cursor:pointer; list-style:none; }
+      .public-list-details > summary::-webkit-details-marker { display:none; }
+      .public-list-details > summary:before { content:"Veure la llista de persones apuntades"; }
+      .public-list-details > summary:after { content:"＋"; margin-left:auto; }
+      .public-list-details[open] > summary:before { content:"Amagar la llista de persones apuntades"; }
+      .public-list-details[open] > summary:after { content:"−"; }
+      .public-list-body { padding:0 18px 18px; }
       @media (max-width:680px) { .meal-cards,.people-grid { grid-template-columns:1fr; } }
       @media (max-width:680px) { .late-booking-note { align-items:stretch; flex-direction:column; } .late-booking-note a { width:100%; text-align:center; } }
     </style>
@@ -43,7 +52,7 @@
           <div id="closed" class="production-note" style="display:none;margin-bottom:16px">
             <strong>Reserves tancades</strong><br />L’organització ha tancat temporalment les noves reserves d’àpats.
           </div>
-          <div class="grid grid-2" style="margin-top:16px">
+          <div class="meals-flow">
             <div class="form-panel">
               <div class="meal-cards">
                 <button class="meal-card active" data-id="af38c060-f814-4195-b29f-ee38697f5abf" data-title="Divendres · Fideus a la cassola" data-kind="lunch">
@@ -91,15 +100,14 @@
               </div>
             </div>
 
-            <div class="form-panel">
-              <div class="section-head">
-                <div><div class="eyebrow">Llista en directe</div><h2 style="margin:4px 0">Qui està apuntat?</h2></div>
-                <span id="connection" class="badge green">Connectant…</span>
-              </div>
+            <details class="form-panel public-list-details">
+              <summary><span id="connection" class="badge green">Connectant…</span></summary>
+              <div class="public-list-body">
               <div class="field"><label>Buscar nom</label><input id="search" placeholder="Nom o cognom" /></div>
               <div id="summary" class="notice-card" style="margin:14px 0"></div>
               <div id="list" class="list"><div class="list-loading">Carregant reserves…</div></div>
-            </div>
+              </div>
+            </details>
           </div>
         </section>
       </div>
@@ -263,6 +271,6 @@
       Promise.all([loadConfig(), loadReservations()]);
       setInterval(loadReservations, 30000);
     </script>
-    <script src="professional-shell.js?v=mobile-menu-20260813"></script>
+    <script src="professional-shell.js?v=ux-general-20260909"></script>
   </body>
 </html>

@@ -495,7 +495,7 @@
       if (seeded) return `Cap de sèrie #${seeded[1]}`;
       const ranked = /^([12])([A-P])$/.exec(source);
       if (ranked)
-        return `${ranked[1] === "1" ? "1r" : "2n"} del grup ${ranked[2]}`;
+        return `${ranked[1] === "1" ? "1r" : "2n"} classificat del Grup ${ranked[2]}`;
       return source;
     };
     const timeLabel = (value) => {
@@ -637,7 +637,11 @@
           const fallback = sourceLabel(game.rival);
           rival.textContent = game.seeded
             ? `${game.names[0] || fallback} · ${fallback}`
-            : `${game.names.length > 1 ? "Possibles rivals" : "Rival"}: ${game.names.join(" · ") || fallback}`;
+            : game.names.length > 1
+              ? `${fallback} · Possibles parelles: ${game.names.join(" · ")}`
+              : game.names.length === 1
+                ? `${fallback}: ${game.names[0]}`
+                : fallback;
           const schedule = document.createElement("small");
           schedule.textContent = `${game.id} · ${game.time}`;
           row.append(label, rival, schedule);

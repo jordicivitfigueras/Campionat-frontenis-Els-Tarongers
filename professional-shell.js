@@ -645,6 +645,42 @@
         });
       return card;
     };
+    const makeFirstPhaseCard = (match, currentPairId, data) => {
+      const playerNames = new Map(
+        data.players.map((player) => [player.id, player.full_name]),
+      );
+      const rivalId =
+        match.team1_id === currentPairId ? match.team2_id : match.team1_id;
+      const rivalPair = data.pairs.find((pair) => pair.id === rivalId);
+      const rivalName = rivalPair
+        ? [
+            playerNames.get(rivalPair.player1_id),
+            playerNames.get(rivalPair.player2_id),
+          ]
+            .filter(Boolean)
+            .join(" / ")
+        : "Rival pendent";
+      const ownScore =
+        match.team1_id === currentPairId ? Number(match.score1) : Number(match.score2);
+      const rivalScore =
+        match.team1_id === currentPairId ? Number(match.score2) : Number(match.score1);
+      const card = document.createElement("div");
+      card.className = `possible-path-card first-phase-card ${match.status === "final" ? "is-final" : match.status === "live" ? "is-live" : ""}`;
+      const heading = document.createElement("strong");
+      heading.textContent = `Partit ${match.id}`;
+      const opponent = document.createElement("span");
+      opponent.textContent = `Rival: ${rivalName}`;
+      const schedule = document.createElement("small");
+      const status =
+        match.status === "final"
+          ? `Finalitzat · ${ownScore}–${rivalScore}`
+          : match.status === "live"
+            ? `En joc · ${ownScore}–${rivalScore}`
+            : "Pendent";
+      schedule.textContent = `${match.scheduled_at || "Horari pendent"} · ${status}`;
+      card.append(heading, opponent, schedule);
+      return card;
+    };
     const findRoute = (sources, token) =>
       Object.entries(sources).find(([, entrants]) => entrants.includes(token));
     const makeRouteCard = (title, detail, matchId, data) => {
@@ -769,9 +805,13 @@
         eyebrow.className = "eyebrow";
         eyebrow.textContent = "Camí de competició";
         const heading = document.createElement("h3");
-        heading.textContent = "Següents partits possibles";
+        heading.textContent = "Partits i següents encreuaments";
         const groupRoutes = [];
         const secondPhaseCards = [];
+        const firstPhaseCards = firstGroupMatches
+          .slice()
+          .sort((a, b) => String(a.scheduled_at || "").localeCompare(String(b.scheduled_at || "")))
+          .map((match) => makeFirstPhaseCard(match, pair.id, data));
         const seed = Number(pair.seed);
         if (seed >= 1 && seed <= 8) {
           const group = String.fromCharCode(73 + seed - 1);
@@ -806,7 +846,8 @@
           }
         }
         section.append(eyebrow, heading);
-        appendRound(section, "2a fase", secondPhaseCards);
+        appendRound(section, "1a fase · Els teus partits", firstPhaseCards);
+        appendRound(section, "2a fase · Possibles grups", secondPhaseCards);
 
         const eighthCards = [];
         const eighthIds = new Set();
@@ -925,7 +966,7 @@
       }
     }
     const style = document.createElement("style");
-    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:9px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card>strong{color:#073e2d;font-size:15px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}.second-phase-seed-note{padding:7px 9px;border-radius:9px;background:#fff1cf;color:#795500!important;font-weight:900}.second-phase-game{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:10px 11px;border:1px solid #dfe8e3;border-radius:11px;background:#fff}.second-phase-game.seed-game{border-color:#e8c878;background:#fffaf0}.second-phase-game b{grid-column:1/-1;color:#183f31;font-size:12px}.second-phase-game span{grid-column:1;min-width:0}.second-phase-game small{grid-column:2;grid-row:2;white-space:nowrap;align-self:start}.eliminated-path{padding:16px;border:1px solid #edc4bd;border-radius:15px;background:#fff5f3}.eliminated-path h3{color:#8b2e22!important}.eliminated-path p{margin:0;color:#76534e;font-size:13px;line-height:1.5}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}.second-phase-game{grid-template-columns:1fr}.second-phase-game span,.second-phase-game small{grid-column:1;grid-row:auto}}`;
+    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:9px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.first-phase-card{border-color:#cfe0d7;background:#fff}.first-phase-card.is-live{border-color:#e7a823;background:#fffaf0}.first-phase-card.is-final{background:#edf7f2;border-color:#badac9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card>strong{color:#073e2d;font-size:15px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}.second-phase-seed-note{padding:7px 9px;border-radius:9px;background:#fff1cf;color:#795500!important;font-weight:900}.second-phase-game{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:10px 11px;border:1px solid #dfe8e3;border-radius:11px;background:#fff}.second-phase-game.seed-game{border-color:#e8c878;background:#fffaf0}.second-phase-game b{grid-column:1/-1;color:#183f31;font-size:12px}.second-phase-game span{grid-column:1;min-width:0}.second-phase-game small{grid-column:2;grid-row:2;white-space:nowrap;align-self:start}.eliminated-path{padding:16px;border:1px solid #edc4bd;border-radius:15px;background:#fff5f3}.eliminated-path h3{color:#8b2e22!important}.eliminated-path p{margin:0;color:#76534e;font-size:13px;line-height:1.5}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}.second-phase-game{grid-template-columns:1fr}.second-phase-game span,.second-phase-game small{grid-column:1;grid-row:auto}}`;
     document.head.appendChild(style);
     new MutationObserver(() => setTimeout(decoratePossiblePaths, 0)).observe(
       result,

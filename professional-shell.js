@@ -453,6 +453,160 @@
     });
     setTimeout(decorate, 600);
   }
+  function setupPossibleMatchPaths() {
+    if (path != "/el-meu-torneig") return;
+    const result = document.getElementById("result");
+    if (!result) return;
+    const secondPhaseSources = {
+      I: [["S1", "1A"], ["1A", "2B"], ["S1", "2B"]],
+      J: [["S2", "1B"], ["1B", "2C"], ["S2", "2C"]],
+      K: [["S3", "1C"], ["1C", "2D"], ["S3", "2D"]],
+      L: [["S4", "1D"], ["1D", "2E"], ["S4", "2E"]],
+      M: [["S5", "1E"], ["1E", "2F"], ["S5", "2F"]],
+      N: [["S6", "1F"], ["1F", "2G"], ["S6", "2G"]],
+      O: [["S7", "1G"], ["1G", "2H"], ["S7", "2H"]],
+      P: [["S8", "1H"], ["1H", "2A"], ["S8", "2A"]],
+    };
+    const norm = (value) =>
+      String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+    const sourceLabel = (source) => {
+      const seeded = /^S(\d+)$/.exec(source);
+      if (seeded) return `Cap de sèrie #${seeded[1]}`;
+      const ranked = /^([12])([A-H])$/.exec(source);
+      if (ranked)
+        return `${ranked[1] === "1" ? "1r" : "2n"} del grup ${ranked[2]}`;
+      return source;
+    };
+    const timeLabel = (value) => {
+      if (!value) return "Horari pendent";
+      const text = String(value);
+      const time = text.match(/(\d{1,2}:\d{2})/);
+      return time ? time[1] : text;
+    };
+    let dataPromise;
+    const loadPathData = () =>
+      (dataPromise ||= Promise.all([
+        SupaSync.req("/rest/v1/players?select=id,full_name"),
+        SupaSync.req(
+          "/rest/v1/pairs?tournament_id=eq.2026&select=id,seed,player1_id,player2_id",
+        ),
+        SupaSync.req(
+          "/rest/v1/matches?tournament_id=eq.2026&select=id,scheduled_at,team1_id,team2_id,team1_source,team2_source,status",
+        ),
+      ]).then(([players, pairs, matches]) => ({ players, pairs, matches })));
+    const branchFor = (group, position) => {
+      const offset = group.charCodeAt(0) - 65;
+      const targetOffset = position === 1 ? offset : (offset + 7) % 8;
+      return String.fromCharCode(73 + targetOffset);
+    };
+    const makeCard = (title, token, group, matches) => {
+      const sources = secondPhaseSources[group] || [];
+      const matchIds = sources
+        .map((pair, index) => (pair.includes(token) ? `${group}${index + 1}` : null))
+        .filter(Boolean);
+      const rivals = [
+        ...new Set(
+          sources
+            .filter((pair) => pair.includes(token))
+            .flatMap((pair) => pair.filter((source) => source !== token)),
+        ),
+      ];
+      const times = matchIds.map((id) => {
+        const match = matches.find((item) => item.id === id);
+        return timeLabel(match?.scheduled_at);
+      });
+      const card = document.createElement("div");
+      card.className = "possible-path-card";
+      const heading = document.createElement("strong");
+      heading.textContent = title;
+      const opponents = document.createElement("span");
+      opponents.textContent = `Possibles rivals: ${rivals.map(sourceLabel).join(" i ")}`;
+      const schedule = document.createElement("small");
+      schedule.textContent = `Partits: ${times.join(" i ")}`;
+      card.append(heading, opponents, schedule);
+      return card;
+    };
+    async function decoratePossiblePaths() {
+      const identity = result.querySelector(".identity");
+      const playerName = identity?.querySelector(".identity-top h2")?.textContent?.trim();
+      const nextMatch = identity?.querySelector(".next-match");
+      if (!identity || !playerName || !nextMatch || identity.dataset.pathsLoading)
+        return;
+      if (identity.dataset.pathsPlayer === norm(playerName)) return;
+      identity.dataset.pathsLoading = "true";
+      try {
+        const data = await loadPathData();
+        const player = data.players.find(
+          (item) => norm(item.full_name) === norm(playerName),
+        );
+        const pair = player
+          ? data.pairs.find(
+              (item) =>
+                item.player1_id === player.id || item.player2_id === player.id,
+            )
+          : null;
+        if (!pair) return;
+        const section = document.createElement("section");
+        section.className = "possible-paths";
+        const eyebrow = document.createElement("div");
+        eyebrow.className = "eyebrow";
+        eyebrow.textContent = "Camí de competició";
+        const heading = document.createElement("h3");
+        heading.textContent = "Següents partits possibles";
+        const grid = document.createElement("div");
+        grid.className = "possible-path-grid";
+        if (Number(pair.seed) <= 8) {
+          const group = String.fromCharCode(73 + Number(pair.seed) - 1);
+          grid.append(
+            makeCard(`Cap de sèrie · Grup ${group}`, `S${pair.seed}`, group, data.matches),
+          );
+        } else {
+          const firstMatch = data.matches.find(
+            (match) =>
+              /^[A-H][1-3]$/.test(match.id) &&
+              (match.team1_id === pair.id || match.team2_id === pair.id),
+          );
+          const group = firstMatch?.id?.[0];
+          if (!group) return;
+          const firstTarget = branchFor(group, 1);
+          const secondTarget = branchFor(group, 2);
+          grid.append(
+            makeCard(
+              `Si quedeu 1rs · Grup ${firstTarget}`,
+              `1${group}`,
+              firstTarget,
+              data.matches,
+            ),
+            makeCard(
+              `Si quedeu 2ns · Grup ${secondTarget}`,
+              `2${group}`,
+              secondTarget,
+              data.matches,
+            ),
+          );
+        }
+        section.append(eyebrow, heading, grid);
+        nextMatch.insertAdjacentElement("afterend", section);
+        identity.dataset.pathsPlayer = norm(playerName);
+      } catch (error) {
+        console.warn("Possible match paths", error);
+      } finally {
+        delete identity.dataset.pathsLoading;
+      }
+    }
+    const style = document.createElement("style");
+    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 11px!important}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-path-card strong{color:#073e2d;font-size:14px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}}`;
+    document.head.appendChild(style);
+    new MutationObserver(() => setTimeout(decoratePossiblePaths, 0)).observe(
+      result,
+      { childList: true, subtree: true },
+    );
+    setTimeout(decoratePossiblePaths, 650);
+  }
   loadSync()
     .then(async () => {
       if (isAdmin) {
@@ -464,6 +618,7 @@
       await SupaSync.init();
       await setupMyTournamentPicker();
       setupWorkflowActions();
+      setupPossibleMatchPaths();
       await loadScript("/name-picker.js?v=identity4").catch(() => {});
       const identityFields = new Set([
         "p1",

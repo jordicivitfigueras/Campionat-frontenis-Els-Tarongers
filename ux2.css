@@ -114,3 +114,6 @@ body{font-size:15px}
   .app-content .quick-card .qvalue{font-size:22px!important}
   .app-content .public-hero{padding:20px 16px!important}
 }
+
+/* Resultats: acostar la primera puntuació al separador central. */
+.app-content .score-evo-grid > :nth-child(2n + 1){text-align:right}

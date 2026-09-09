@@ -598,32 +598,51 @@
     };
     const makeCard = (title, token, group, data, currentPairId) => {
       const sources = secondPhaseSources[group] || [];
-      const matchIds = sources
-        .map((pair, index) => (pair.includes(token) ? `${group}${index + 1}` : null))
-        .filter(Boolean);
-      const rivals = [
-        ...new Set(
-          sources
-            .filter((pair) => pair.includes(token))
-            .flatMap((pair) => pair.filter((source) => source !== token)),
-        ),
-      ];
-      const times = matchIds.map((id) => {
+      const games = sources.flatMap((entrants, index) => {
+        if (!entrants.includes(token)) return [];
+        const id = `${group}${index + 1}`;
+        const rival = entrants.find((source) => source !== token);
         const match = data.matches.find((item) => item.id === id);
-        return timeLabel(match?.scheduled_at);
+        return [{
+          id,
+          rival,
+          time: timeLabel(match?.scheduled_at),
+          names: possibleRivalNames([rival], "ranked", data, currentPairId),
+          seeded: /^S\d+$/.test(rival),
+        }];
       });
-      const names = possibleRivalNames(rivals, "ranked", data, currentPairId);
       const card = document.createElement("div");
       card.className = "possible-path-card";
       const heading = document.createElement("strong");
       heading.textContent = title;
-      const opponents = document.createElement("span");
-      opponents.textContent = names.length
-        ? `Possibles rivals: ${names.join(" · ")}`
-        : `Possibles rivals: ${rivals.map(sourceLabel).join(" i ")}`;
-      const schedule = document.createElement("small");
-      schedule.textContent = `Partits: ${times.join(" i ")}`;
-      card.append(heading, opponents, schedule);
+      card.append(heading);
+      if (/^S\d+$/.test(token)) {
+        const note = document.createElement("span");
+        note.className = "second-phase-seed-note";
+        note.textContent = "Sou el cap de sèrie d’aquest grup";
+        card.append(note);
+      }
+      games
+        .sort((a, b) => Number(b.seeded) - Number(a.seeded) || a.id.localeCompare(b.id))
+        .forEach((game, index) => {
+          const row = document.createElement("div");
+          row.className = `second-phase-game ${game.seeded ? "seed-game" : "open-game"}`;
+          const label = document.createElement("b");
+          label.textContent = game.seeded
+            ? "Partit contra el cap de sèrie"
+            : games.length > 1
+              ? "L’altre partit del grup"
+              : "Partit del grup";
+          const rival = document.createElement("span");
+          const fallback = sourceLabel(game.rival);
+          rival.textContent = game.seeded
+            ? `${game.names[0] || fallback} · ${fallback}`
+            : `${game.names.length > 1 ? "Possibles rivals" : "Rival"}: ${game.names.join(" · ") || fallback}`;
+          const schedule = document.createElement("small");
+          schedule.textContent = `${game.id} · ${game.time}`;
+          row.append(label, rival, schedule);
+          card.append(row);
+        });
       return card;
     };
     const findRoute = (sources, token) =>
@@ -906,7 +925,7 @@
       }
     }
     const style = document.createElement("style");
-    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card strong{color:#073e2d;font-size:14px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}.eliminated-path{padding:16px;border:1px solid #edc4bd;border-radius:15px;background:#fff5f3}.eliminated-path h3{color:#8b2e22!important}.eliminated-path p{margin:0;color:#76534e;font-size:13px;line-height:1.5}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}}`;
+    style.textContent = `.possible-paths{margin-top:18px;padding-top:17px;border-top:1px solid #e2eae5}.possible-paths h3{margin:4px 0 13px!important}.possible-round{margin-top:14px}.possible-round h4{margin:0 0 8px;color:#073e2d;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.possible-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.possible-path-card{display:flex;flex-direction:column;gap:9px;padding:14px;border:1px solid #dce7e1;border-radius:15px;background:#f8fbf9}.possible-route-card{position:relative;padding-left:19px}.possible-route-card:before{content:"";position:absolute;left:8px;top:17px;width:4px;height:calc(100% - 34px);min-height:28px;border-radius:4px;background:#e7a823}.possible-path-card>strong{color:#073e2d;font-size:15px}.possible-path-card span{color:#52665c;font-size:12px;line-height:1.45}.possible-path-card small{color:#8a650f;font-size:11px;font-weight:900}.second-phase-seed-note{padding:7px 9px;border-radius:9px;background:#fff1cf;color:#795500!important;font-weight:900}.second-phase-game{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:10px 11px;border:1px solid #dfe8e3;border-radius:11px;background:#fff}.second-phase-game.seed-game{border-color:#e8c878;background:#fffaf0}.second-phase-game b{grid-column:1/-1;color:#183f31;font-size:12px}.second-phase-game span{grid-column:1;min-width:0}.second-phase-game small{grid-column:2;grid-row:2;white-space:nowrap;align-self:start}.eliminated-path{padding:16px;border:1px solid #edc4bd;border-radius:15px;background:#fff5f3}.eliminated-path h3{color:#8b2e22!important}.eliminated-path p{margin:0;color:#76534e;font-size:13px;line-height:1.5}@media(max-width:720px){.possible-path-grid{grid-template-columns:1fr}.second-phase-game{grid-template-columns:1fr}.second-phase-game span,.second-phase-game small{grid-column:1;grid-row:auto}}`;
     document.head.appendChild(style);
     new MutationObserver(() => setTimeout(decoratePossiblePaths, 0)).observe(
       result,

@@ -314,7 +314,7 @@
       document.head.appendChild(s);
     });
   const loadSync = () =>
-    window.SupaSync ? Promise.resolve() : loadScript("/supabase-sync.js?v=id4");
+    window.SupaSync ? Promise.resolve() : loadScript("/supabase-sync.js?v=flow-sync-20260909");
   async function setupMyTournamentPicker() {
     if (path != "/el-meu-torneig") return;
     const input = document.getElementById("q"),
@@ -505,6 +505,9 @@
       return time ? time[1] : text;
     };
     let dataPromise;
+    window.addEventListener("supabase:change", () => {
+      dataPromise = undefined;
+    });
     const loadPathData = () =>
       (dataPromise ||= Promise.all([
         SupaSync.req("/rest/v1/players?select=id,full_name"),

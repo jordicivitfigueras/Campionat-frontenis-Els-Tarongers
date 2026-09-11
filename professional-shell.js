@@ -508,6 +508,8 @@
       const time = text.match(/(\d{1,2}:\d{2})/);
       return time ? time[1] : text;
     };
+    const fullScheduleLabel = (value) =>
+      value ? String(value).trim() : "Horari pendent";
     let dataPromise;
     window.addEventListener("supabase:change", () => {
       dataPromise = undefined;
@@ -610,7 +612,7 @@
         return [{
           id,
           rival,
-          time: timeLabel(match?.scheduled_at),
+          time: fullScheduleLabel(match?.scheduled_at),
           names: possibleRivalNames([rival], "ranked", data, currentPairId),
           seeded: /^S\d+$/.test(rival),
         }];

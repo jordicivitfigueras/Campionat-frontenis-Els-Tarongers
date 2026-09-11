@@ -602,6 +602,16 @@
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b, "ca", { sensitivity: "base" }));
     };
+    const pairNameById = (pairId, data) => {
+      const pair = data.pairs.find((item) => item.id === pairId);
+      if (!pair) return "";
+      const playerNames = new Map(
+        data.players.map((player) => [player.id, player.full_name]),
+      );
+      return [playerNames.get(pair.player1_id), playerNames.get(pair.player2_id)]
+        .filter(Boolean)
+        .join(" / ");
+    };
     const makeCard = (title, token, group, data, currentPairId) => {
       const sources = secondPhaseSources[group] || [];
       const games = sources.flatMap((entrants, index) => {
@@ -609,12 +619,22 @@
         const id = `${group}${index + 1}`;
         const rival = entrants.find((source) => source !== token);
         const match = data.matches.find((item) => item.id === id);
+        const assignedRivalId =
+          match?.team1_id === currentPairId
+            ? match.team2_id
+            : match?.team2_id === currentPairId
+              ? match.team1_id
+              : null;
+        const assignedRival = pairNameById(assignedRivalId, data);
         return [{
           id,
           rival,
           time: fullScheduleLabel(match?.scheduled_at),
-          names: possibleRivalNames([rival], "ranked", data, currentPairId),
+          names: assignedRival
+            ? [assignedRival]
+            : possibleRivalNames([rival], "ranked", data, currentPairId),
           seeded: /^S\d+$/.test(rival),
+          resolved: Boolean(assignedRival),
         }];
       });
       const isChoice = /^Si quedeu/.test(title);
@@ -642,8 +662,12 @@
               : "Partit del grup";
           const rival = document.createElement("span");
           const fallback = sourceLabel(game.rival);
-          rival.className = game.seeded ? "game-rival" : "classification-origin";
-          rival.textContent = game.seeded
+          rival.className = game.seeded || game.resolved
+            ? "game-rival"
+            : "classification-origin";
+          rival.textContent = game.resolved
+            ? `${game.names[0]} · ${fallback}`
+            : game.seeded
             ? `${game.names[0] || fallback} · ${fallback}`
             : `Rival: ${fallback}`;
           const candidates = document.createElement("span");
@@ -654,7 +678,7 @@
           const schedule = document.createElement("small");
           schedule.textContent = `${game.id} · ${game.time}`;
           row.append(label, rival);
-          if (!game.seeded) row.append(candidates);
+          if (!game.seeded && !game.resolved) row.append(candidates);
           row.append(schedule);
           card.append(row);
         });
@@ -870,7 +894,13 @@
             : `Classificació del Grup ${firstGroup} encara oberta`;
         section.append(competitionStatus);
         appendRound(section, "1a fase · Els teus partits", firstPhaseCards);
-        appendRound(section, "2a fase · Possibles grups", secondPhaseCards);
+        appendRound(
+          section,
+          seed <= 8 || decidedPosition
+            ? "2a fase · Partits del teu grup"
+            : "2a fase · Possibles grups",
+          secondPhaseCards,
+        );
 
         const eighthCards = [];
         const eighthIds = new Set();

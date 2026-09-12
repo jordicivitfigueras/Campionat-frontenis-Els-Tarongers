@@ -1,1 +1,138 @@
-<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#086443"><title>MVP · Campionat Frontenis Els Tarongers 2026</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="professional.css"><style>.mvp-history{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}.mvp-history-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:var(--shadow)}.mvp-history-card h3{margin:0;color:var(--brand);font-size:24px}.mvp-winner{display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}.mvp-winner:last-child{border-bottom:0}.mvp-year{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#edf5f0;color:var(--brand);font-weight:950;font-size:12px}.mvp-winner strong{display:block;color:var(--brand-dark);font-size:16px}.mvp-winner span{font-size:10px;color:var(--muted)}.mvp-rule{background:linear-gradient(135deg,#043a28,#086443);color:#fff;border-radius:22px;padding:24px;margin-bottom:20px}.mvp-rule strong{font-size:21px}.mvp-rule p{margin:7px 0 0;color:rgba(255,255,255,.78);line-height:1.55}.identity-grid{display:grid;grid-template-columns:.55fr 1.45fr;gap:12px}@media(max-width:760px){.mvp-history,.identity-grid{grid-template-columns:1fr}}</style></head><body><main class="page"><div class="container"><header class="topbar"></header><section class="section"><div class="section-head"><div><div class="eyebrow">Votació dels socis</div><h1 class="section-title">MVP 2026</h1></div></div><div class="mvp-rule"><strong>1 vot masculí + 1 vot femení per soci 2026</strong><p>El vot queda vinculat al número de soci. Cada número només pot votar una vegada. Els resultats es mantenen ocults fins al tancament.</p></div><div id="closed" class="notice-card" style="display:none;margin-bottom:16px"><strong>Votació tancada</strong><div class="meta">L'organització encara no ha obert la votació MVP.</div></div><div id="voteArea"><div class="vote-grid"><div class="vote-card"><h2>MVP Masculí</h2><div id="male" class="vote-list"></div></div><div class="vote-card"><h2>MVP Femení</h2><div id="female" class="vote-list"></div></div></div><div class="form-panel" style="margin-top:18px"><div class="identity-grid"><div class="field"><label>Número de soci</label><input id="memberNo" type="number" min="1" max="999" inputmode="numeric" placeholder="#"></div><div class="field"><label>Nom i cognoms del soci</label><input id="voter" placeholder="Tal com consta al registre"></div></div><div class="actions"><button id="voteBtn" class="btn btn-accent" onclick="vote()">Confirmar els dos vots</button></div><div id="voteMsg" style="margin-top:12px"></div></div></div><div class="section-head" style="margin-top:38px"><div><div class="eyebrow">Palmarès oficial</div><h2 class="section-title" style="font-size:40px">Històric MVP</h2></div></div><div class="mvp-history"><div class="mvp-history-card"><div class="eyebrow">MVP Masculí</div><h3>Guanyadors</h3><div class="mvp-winner"><div class="mvp-year">2022</div><div><strong>Mauro Lenhardi</strong><span>MVP masculí</span></div></div><div class="mvp-winner"><div class="mvp-year">2023</div><div><strong>Álvaro Palou</strong><span>MVP masculí</span></div></div><div class="mvp-winner"><div class="mvp-year">2024</div><div><strong>No es va fer</strong><span>Sense votació MVP</span></div></div><div class="mvp-winner"><div class="mvp-year">2025</div><div><strong>Juan Sobreroca</strong><span>MVP masculí</span></div></div></div><div class="mvp-history-card"><div class="eyebrow">MVP Femení</div><h3>Guanyadores</h3><div class="mvp-winner"><div class="mvp-year">2022</div><div><strong>Laia Pàmies</strong><span>MVP femení</span></div></div><div class="mvp-winner"><div class="mvp-year">2023</div><div><strong>Julia Serrano</strong><span>MVP femení</span></div></div><div class="mvp-winner"><div class="mvp-year">2024</div><div><strong>No es va fer</strong><span>Sense votació MVP</span></div></div><div class="mvp-winner"><div class="mvp-year">2025</div><div><strong>María Salaverría</strong><span>MVP femení</span></div></div></div></div></section></div></main><script src="portal.js"></script><script>const p=Portal.load(),cfg=p.config||{},open=cfg.mvpOpen===true,candidates={male:['Mauro Lenhardi','Roger Juanola','Marc Muntané','Alex Sanchez','Juan Sobreroca','Xavi Palou fill','Marius Alcala','Adri Salaverría','Arnau Costa','Otger Costa','Jordi Civit','Marc Balcells','Manel Villegas','Sergi Ripollés','Ferran Cabezas','Alvaro Palou','Pepe Palou','Pol Gaynes','Gerard Civit','Guillem Tost','Joan Valette','Pol Mitjavila','Martí Coma','Lluís Aymami','Diego Salvo','Joel Socias','Dardo Soler','Edu Soler','Toni Civit','Jordi Balcells Senior','Lluís Cabezas','Xavi Palou Pare','Nacho Palou','Jorge Palou','Albert Civit','Albert Cabezas','Ramon Romero','Ian Dameson','Eloi de la Torre','Edu Llop','David Llop','Guille Soler','Alex Herrera','Daniel Capdevila'],female:['Julia Serrano','María Salaverría','Laura Soler','Carlota Domínguez','Blanca Josep','Sara Vidal','Claudia Balcells','Jemi Recasens','Alexandra Biosca','Elena Altes','Claudia Mitjavila']};let sm=null,sf=null;if(!open){closed.style.display='block';voteArea.style.opacity='.45';voteBtn.disabled=true}function draw(){male.innerHTML=candidates.male.map((n,i)=>`<button type="button" class="candidate ${sm===n?'selected':''}" ${open?'':'disabled'} onclick="sm=candidates.male[${i}];draw()">${Portal.esc(n)}</button>`).join('');female.innerHTML=candidates.female.map((n,i)=>`<button type="button" class="candidate ${sf===n?'selected':''}" ${open?'':'disabled'} onclick="sf=candidates.female[${i}];draw()">${Portal.esc(n)}</button>`).join('')}async function vote(){if(!open)return alert('La votació encara no està oberta.');const v=voter.value.trim(),no=Number(memberNo.value);if(!sm||!sf)return alert("Has d'escollir un MVP masculí i un MVP femení.");if(!no||v.split(/\s+/).length<2)return alert('Posa el teu número de soci i nom complet.');voteBtn.disabled=true;voteBtn.textContent='Validant…';voteMsg.innerHTML='';try{if(!window.SupaSync)throw new Error('Connexió no disponible');await SupaSync.req('/rest/v1/rpc/submit_mvp_vote',{method:'POST',body:{p_member_number:no,p_member_name:v,p_male:sm,p_female:sf}});voteMsg.innerHTML=`<div class="success-card"><strong>✓ Vot registrat</strong><div class="meta">Gràcies. El soci #${no} ja ha emès els seus dos vots.</div></div>`;memberNo.value='';voter.value='';sm=null;sf=null;draw()}catch(e){voteMsg.innerHTML=`<div class="production-note"><strong>No s’ha pogut registrar.</strong> ${Portal.esc(e.message||'Comprova les dades del soci.')}</div>`}finally{voteBtn.disabled=false;voteBtn.textContent='Confirmar els dos vots'}}draw();</script><script src="professional-shell.js"></script></body></html>
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#086443">
+  <title>MVP · Campionat Frontenis Els Tarongers 2026</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/professional.css">
+  <style>
+    .mvp-rule{background:linear-gradient(135deg,#043a28,#086443);color:#fff;border-radius:22px;padding:24px;margin-bottom:20px}
+    .mvp-rule strong{font-size:21px}.mvp-rule p{margin:7px 0 0;color:rgba(255,255,255,.8);line-height:1.55}
+    .vote-card{min-width:0}.candidate-search{width:100%;margin:0 0 10px}
+    .candidate-scroll{display:grid;gap:8px;max-height:440px;overflow:auto;padding:3px 5px 3px 3px}
+    .candidate{display:flex!important;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:13px 15px!important;border-radius:14px!important}
+    .candidate::after{content:"";width:18px;height:18px;border:2px solid #b9c9c1;border-radius:50%;flex:none}
+    .candidate.selected::after{border:5px solid #086443;background:#fff}
+    .candidate-empty{padding:18px;text-align:center;color:var(--muted);background:#f5f8f6;border-radius:14px}
+    .candidate-count{font-size:12px;color:var(--muted);font-weight:800;margin:-6px 0 12px}
+    .voter-panel{max-width:680px;margin:20px auto 0}.voter-panel .field{margin:0}
+    .mvp-history{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+    .mvp-history-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+    .mvp-history-card h3{margin:0;color:var(--brand);font-size:24px}.mvp-winner{display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}
+    .mvp-winner:last-child{border-bottom:0}.mvp-year{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#edf5f0;color:var(--brand);font-weight:950;font-size:12px}
+    .mvp-winner strong{display:block;color:var(--brand-dark);font-size:16px}.mvp-winner span{font-size:10px;color:var(--muted)}
+    @media(max-width:760px){.mvp-history{grid-template-columns:1fr}.candidate-scroll{max-height:330px}}
+  </style>
+</head>
+<body>
+<main class="page"><div class="container"><section class="section">
+  <div class="section-head"><div><div class="eyebrow">Votació dels socis</div><h1 class="section-title">MVP 2026</h1></div></div>
+  <div class="mvp-rule"><strong>1 vot masculí + 1 vot femení per soci 2026</strong><p>Escriu el teu nom complet. Si constes com a soci actiu, podràs votar una vegada. Els resultats es mantenen ocults fins al tancament.</p></div>
+  <div id="loading" class="notice-card"><strong>Carregant jugadors…</strong><div class="meta">Connectant amb les dades oficials del torneig.</div></div>
+  <div id="closed" class="notice-card" style="display:none;margin-bottom:16px"><strong>Votació tancada</strong><div class="meta">L’organització encara no ha obert la votació MVP.</div></div>
+  <div id="voteArea" style="display:none">
+    <div class="vote-grid">
+      <div class="vote-card"><h2>MVP masculí</h2><input id="maleSearch" class="candidate-search" type="search" placeholder="Buscar jugador…" autocomplete="off"><div id="maleCount" class="candidate-count"></div><div id="male" class="candidate-scroll"></div></div>
+      <div class="vote-card"><h2>MVP femení</h2><input id="femaleSearch" class="candidate-search" type="search" placeholder="Buscar jugadora…" autocomplete="off"><div id="femaleCount" class="candidate-count"></div><div id="female" class="candidate-scroll"></div></div>
+    </div>
+    <div class="form-panel voter-panel">
+      <div class="field"><label for="voter">El teu nom i cognoms</label><input id="voter" autocomplete="name" placeholder="Tal com constes al registre de socis"></div>
+      <p class="meta">Comprovarem automàticament que siguis soci actiu del 2026. No cal indicar el número de soci.</p>
+      <div class="actions"><button id="voteBtn" class="btn btn-accent" type="button">Confirmar els dos vots</button></div>
+      <div id="voteMsg" style="margin-top:12px" aria-live="polite"></div>
+    </div>
+  </div>
+  <div class="section-head" style="margin-top:38px"><div><div class="eyebrow">Palmarès oficial</div><h2 class="section-title" style="font-size:40px">Històric MVP</h2></div></div>
+  <div class="mvp-history">
+    <div class="mvp-history-card"><div class="eyebrow">MVP Masculí</div><h3>Guanyadors</h3><div class="mvp-winner"><div class="mvp-year">2022</div><div><strong>Mauro Lenhardi</strong><span>MVP masculí</span></div></div><div class="mvp-winner"><div class="mvp-year">2023</div><div><strong>Álvaro Palou</strong><span>MVP masculí</span></div></div><div class="mvp-winner"><div class="mvp-year">2024</div><div><strong>No es va fer</strong><span>Sense votació MVP</span></div></div><div class="mvp-winner"><div class="mvp-year">2025</div><div><strong>Juan Sobreroca</strong><span>MVP masculí</span></div></div></div>
+    <div class="mvp-history-card"><div class="eyebrow">MVP Femení</div><h3>Guanyadores</h3><div class="mvp-winner"><div class="mvp-year">2022</div><div><strong>Laia Pàmies</strong><span>MVP femení</span></div></div><div class="mvp-winner"><div class="mvp-year">2023</div><div><strong>Julia Serrano</strong><span>MVP femení</span></div></div><div class="mvp-winner"><div class="mvp-year">2024</div><div><strong>No es va fer</strong><span>Sense votació MVP</span></div></div><div class="mvp-winner"><div class="mvp-year">2025</div><div><strong>María Salaverría</strong><span>MVP femení</span></div></div></div>
+  </div>
+</section></div></main>
+<script src="/config.js"></script>
+<script src="/supabase-sync.js?v=mvp-voting-20260912"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const norm = value => String(value || '').toLocaleLowerCase('ca').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  let isOpen = false;
+  let candidates = {male: [], female: []};
+  let selected = {male: null, female: null};
+
+  function readableError(error) {
+    try { return JSON.parse(error.message).message || error.message; } catch { return error.message || 'Comprova el nom i torna-ho a provar.'; }
+  }
+
+  function drawGender(gender) {
+    const query = norm($(gender + 'Search').value);
+    const visible = candidates[gender].filter(player => norm(player.full_name).includes(query));
+    $(gender + 'Count').textContent = `${candidates[gender].length} ${gender === 'male' ? 'jugadors' : 'jugadores'} del torneig`;
+    $(gender).innerHTML = visible.length
+      ? visible.map(player => `<button type="button" class="candidate ${selected[gender] === player.id ? 'selected' : ''}" data-gender="${gender}" data-id="${player.id}">${esc(player.full_name)}</button>`).join('')
+      : '<div class="candidate-empty">No hi ha coincidències.</div>';
+    $(gender).querySelectorAll('.candidate').forEach(button => button.addEventListener('click', () => {
+      selected[button.dataset.gender] = button.dataset.id;
+      drawGender(button.dataset.gender);
+    }));
+  }
+
+  async function load() {
+    try {
+      if (!window.SupaSync) throw new Error('Connexió no disponible');
+      await SupaSync.init();
+      const [config, players, pairs] = await Promise.all([
+        SupaSync.req('/rest/v1/tournament_config?id=eq.2026&select=mvp_open'),
+        SupaSync.req('/rest/v1/players?select=id,full_name,gender'),
+        SupaSync.req('/rest/v1/pairs?tournament_id=eq.2026&select=player1_id,player2_id')
+      ]);
+      const activeIds = new Set(pairs.flatMap(pair => [pair.player1_id, pair.player2_id]).filter(Boolean));
+      const activePlayers = players.filter(player => activeIds.has(player.id));
+      candidates.male = activePlayers.filter(player => player.gender === 'male').sort((a,b) => a.full_name.localeCompare(b.full_name, 'ca'));
+      candidates.female = activePlayers.filter(player => player.gender === 'female').sort((a,b) => a.full_name.localeCompare(b.full_name, 'ca'));
+      if (!candidates.male.length || !candidates.female.length) throw new Error('Falta completar la llista oficial de jugadors.');
+      isOpen = config?.[0]?.mvp_open === true;
+      $('loading').style.display = 'none';
+      $('closed').style.display = isOpen ? 'none' : 'block';
+      $('voteArea').style.display = 'block';
+      $('voteBtn').disabled = !isOpen;
+      drawGender('male'); drawGender('female');
+      $('voter').value = localStorage.getItem('frontenis_my_name_2026') || '';
+    } catch (error) {
+      $('loading').innerHTML = `<strong>No s’ha pogut carregar la votació.</strong><div class="meta">${esc(readableError(error))}</div>`;
+    }
+  }
+
+  async function vote() {
+    if (!isOpen) return;
+    const voterName = $('voter').value.trim();
+    if (!voterName) return alert('Escriu el teu nom i cognoms.');
+    if (!selected.male || !selected.female) return alert('Escull un MVP masculí i una MVP femenina.');
+    $('voteBtn').disabled = true;
+    $('voteBtn').textContent = 'Comprovant soci…';
+    $('voteMsg').innerHTML = '';
+    try {
+      await SupaSync.req('/rest/v1/rpc/submit_mvp_vote_by_name', {method:'POST', body:{p_member_name:voterName,p_male:selected.male,p_female:selected.female}});
+      localStorage.setItem('frontenis_my_name_2026', voterName);
+      $('voteMsg').innerHTML = `<div class="success-card"><strong>✓ Vot registrat</strong><div class="meta">Gràcies, ${esc(voterName)}. Els teus dos vots han quedat guardats.</div></div>`;
+      $('voter').disabled = true; $('maleSearch').disabled = true; $('femaleSearch').disabled = true;
+      $('male').querySelectorAll('button').forEach(button => button.disabled = true);
+      $('female').querySelectorAll('button').forEach(button => button.disabled = true);
+    } catch (error) {
+      $('voteMsg').innerHTML = `<div class="production-note"><strong>No s’ha pogut registrar.</strong> ${esc(readableError(error))}</div>`;
+      $('voteBtn').disabled = false;
+    } finally {
+      $('voteBtn').textContent = 'Confirmar els dos vots';
+    }
+  }
+
+  $('maleSearch').addEventListener('input', () => drawGender('male'));
+  $('femaleSearch').addEventListener('input', () => drawGender('female'));
+  $('voteBtn').addEventListener('click', vote);
+  load();
+})();
+</script>
+<script src="/professional-shell.js?v=mvp-voting-20260912"></script>
+</body>
+</html>
